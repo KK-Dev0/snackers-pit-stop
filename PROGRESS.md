@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 3 of 111 complete · **Current:** M1 in progress — next is task 4.
+**Status:** 4 of 112 complete · **Current:** M1 in progress — next is task 5.
 
 ## How to use
 
@@ -18,7 +18,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 ### M1 — Scaffold, design system, landing
 - [x] 2. **Scaffold the app.** Create the Next.js App Router project with TypeScript strict, ESLint, Prettier, `src/`, `@/*` alias, scripts for dev/build/lint/typecheck/test, and a `.gitignore` covering `.env`, `.env.local`, `node_modules`, `.next`, and local SQLite files.
 - [x] 3. **Set up design tokens.** Tailwind + `globals.css` with cream/forest/saffron/tomato CSS variables for light and dark, radii, shadows, and Fraunces + DM Sans via `next/font`.
-- [ ] 4. **Install shadcn/ui.** Init `components.json` and add button, card, input, label, textarea, select, checkbox, switch, tabs, dialog, sheet, dropdown-menu, badge, skeleton, progress, separator, tooltip, sonner.
+- [x] 4. **Install shadcn/ui.** Init `components.json` and add button, card, input, label, textarea, select, checkbox, switch, tabs, dialog, sheet, dropdown-menu, badge, skeleton, progress, separator, tooltip, sonner.
 - [ ] 5. **Add theming.** `next-themes` provider, no-flash script, theme toggle, and system/light/dark persistence.
 - [ ] 6. **Build the app shell.** Root layout metadata/viewport, skip link, desktop top nav, mobile bottom tab bar, and stub routes for Plan, Recipes, Pantry, List, Me, Onboarding.
 - [ ] 7. **Add motion primitives.** `PageReveal`, `StaggerList`, `CardLift`, and a reduced-motion hook; cap app-screen animations at 400 ms.

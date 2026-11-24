@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 /* next-themes toggles a `.dark` class on <html>. */
 @custom-variant dark (&:is(.dark *));
