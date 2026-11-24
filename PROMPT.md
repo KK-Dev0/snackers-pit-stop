@@ -32,7 +32,7 @@ DESIGN DIRECTION (follow closely)
 
 \- Type: an elegant serif for display headings (Fraunces or similar) and a clean sans for UI (Inter or DM Sans). Generous spacing, soft rounded cards, subtle shadows.
 
-\- Motion (Framer Motion, tasteful and fast): staggered page-load reveals, scroll reveals on the landing page, a subtle animated hero, card hover lifts, satisfying check-off animation on the shopping list, smooth layout transitions when meals are rearranged, skeleton loaders. Keep animations under 400ms on app screens. Respect prefers-reduced-motion everywhere. No WebGL, no heavy scroll-jacking, and no paid or unlicensed component packs.
+\- Motion (Framer Motion, tasteful and fast): staggered page-load reveals, scroll reveals on the landing page, a subtle animated hero, card hover lifts, satisfying check-off animation on the shopping list, smooth layout transitions when meals are rearranged, skeleton loaders. Keep animations under 400ms on app screens. Respect prefers-reduced-motion everywhere. WebGL is allowed ONLY for one contained react-three-fiber hero scene on the landing page. App screens (Plan, Recipes, Pantry, List, Me, Onboarding) never use WebGL. No scroll-jacking anywhere. No paid or unlicensed component packs.
 
 \- Navigation: bottom tab bar on mobile (Plan, Recipes, Pantry, List, Me), a slim top nav on desktop. Maximum two taps to any core action.
 

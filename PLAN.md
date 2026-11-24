@@ -127,7 +127,7 @@ All filtering is best-effort. The UI states that users must check labels for all
 - **Type:** Fraunces (display serif) + DM Sans (UI), loaded with `next/font`.
 - **Shape:** 14–20 px radii, soft layered shadows, generous 4/8 px spacing scale.
 - **Motif:** a small checkered-flag accent, fuel-gauge meters, dashed "pit lane" dividers. Used sparingly, never as decoration noise.
-- **Motion:** page-load stagger 40–80 ms, card hover lift 2–4 px, check-off spring, layout transitions for meal moves. App screens ≤ 400 ms; landing up to 600 ms. `prefers-reduced-motion` removes transforms and long fades.
+- **Motion:** page-load stagger 40–80 ms, card hover lift 2–4 px, check-off spring, layout transitions for meal moves. App screens ≤ 400 ms; landing up to 600 ms. `prefers-reduced-motion` removes transforms and long fades. WebGL is allowed only for one contained react-three-fiber hero scene on the landing page (dpr ≤ 1.5, paused when the tab is hidden or the hero is offscreen, static CSS/SVG fallback); app screens never use WebGL. No scroll-jacking anywhere.
 - **Navigation:** mobile bottom tabs (Plan, Recipes, Pantry, List, Me), desktop slim top nav. Core actions within two taps.
 - **Accessibility:** visible focus, 44 px targets, labelled controls, aria-live for list changes, semantic headings, AA contrast in both themes.
 
