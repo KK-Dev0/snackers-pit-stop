@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 1 of 111 complete · **Current:** M0 done — next is M1.
+**Status:** 2 of 111 complete · **Current:** M1 in progress — next is task 3.
 
 ## How to use
 
@@ -16,7 +16,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 1. **Write PLAN.md and PROGRESS.md.** Architecture, folder structure, data model, and a 15-minute task list. *(done)*
 
 ### M1 — Scaffold, design system, landing
-- [ ] 2. **Scaffold the app.** Create the Next.js App Router project with TypeScript strict, ESLint, Prettier, `src/`, `@/*` alias, scripts for dev/build/lint/typecheck/test, and a `.gitignore` covering `.env`, `.env.local`, `node_modules`, `.next`, and local SQLite files.
+- [x] 2. **Scaffold the app.** Create the Next.js App Router project with TypeScript strict, ESLint, Prettier, `src/`, `@/*` alias, scripts for dev/build/lint/typecheck/test, and a `.gitignore` covering `.env`, `.env.local`, `node_modules`, `.next`, and local SQLite files.
 - [ ] 3. **Set up design tokens.** Tailwind + `globals.css` with cream/forest/saffron/tomato CSS variables for light and dark, radii, shadows, and Fraunces + DM Sans via `next/font`.
 - [ ] 4. **Install shadcn/ui.** Init `components.json` and add button, card, input, label, textarea, select, checkbox, switch, tabs, dialog, sheet, dropdown-menu, badge, skeleton, progress, separator, tooltip, sonner.
 - [ ] 5. **Add theming.** `next-themes` provider, no-flash script, theme toggle, and system/light/dark persistence.

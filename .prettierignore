@@ -1,0 +1,12 @@
+.next
+node_modules
+coverage
+package-lock.json
+next-env.d.ts
+PLAN.md
+PROGRESS.md
+PROMPT.md
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
