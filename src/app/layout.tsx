@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -23,8 +26,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${fraunces.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${dmSans.variable} ${fraunces.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+      </body>
     </html>
   );
 }
