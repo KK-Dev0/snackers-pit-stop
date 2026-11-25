@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 59 of 112 complete · **Current:** M4 in progress — next is task 79.
+**Status:** 60 of 112 complete · **Current:** M4 in progress — next is task 80.
 
 ## How to use
 
@@ -100,7 +100,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 76. **Save imports locally.** Persist to Dexie, list under "My imports", support delete, and render a local recipe detail route.
 - [x] 77. **Build recipe browsing.** Search, diet/allergen filters, sort, limit, cards and skeletons.
 - [x] 78. **Build recipe detail.** Servings scaling, computed nutrition/cost estimates, add-to-plan, and source link.
-- [ ] 79. **Polish import UX.** Entry points, progress, validation errors, retry, and "review before saving" messaging.
+- [x] 79. **Polish import UX.** Entry points, progress, validation errors, retry, and "review before saving" messaging.
 - [ ] 80. **Gate M4.** Lint, typecheck, tests, and a manual URL/photo import; commit `feat: recipe import from URL and photo`.
 
 ### M5 — Pantry and shopping list

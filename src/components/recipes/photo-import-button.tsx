@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CameraIcon } from "lucide-react";
+import { CameraIcon, RotateCcwIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ALLOWED_IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/import-constants";
@@ -18,6 +18,7 @@ export function PhotoImportButton({
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
+  const [lastFile, setLastFile] = useState<File | null>(null);
 
   const pickPhoto = () => inputRef.current?.click();
 
@@ -32,6 +33,7 @@ export function PhotoImportButton({
       return;
     }
 
+    setLastFile(file);
     setBusy(true);
     try {
       const form = new FormData();
@@ -89,12 +91,25 @@ export function PhotoImportButton({
         {busy ? "Reading photo…" : "Import from photo"}
       </Button>
       {message ? (
-        <p
-          role={message.error ? "alert" : "status"}
-          className={`text-sm ${message.error ? "text-destructive" : "text-muted-foreground"}`}
-        >
-          {message.text}
-        </p>
+        <div className="space-y-2">
+          <p
+            role={message.error ? "alert" : "status"}
+            className={`text-sm ${message.error ? "text-destructive" : "text-muted-foreground"}`}
+          >
+            {message.text}
+          </p>
+          {message.error && lastFile ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={busy}
+              onClick={() => void upload(lastFile)}
+            >
+              <RotateCcwIcon aria-hidden="true" /> Retry
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

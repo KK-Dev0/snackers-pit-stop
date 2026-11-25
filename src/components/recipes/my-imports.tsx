@@ -18,6 +18,11 @@ export function MyImports() {
         icon={BookMarkedIcon}
         title="My imports is empty"
         description="Recipes you import from a link or photo are saved here, on this device only."
+        action={
+          <Button asChild variant="outline" size="sm">
+            <a href="#import-heading">Import your first recipe</a>
+          </Button>
+        }
       />
     );
   }

@@ -1,6 +1,6 @@
 import { PageHeader } from "@/components/common/page-header";
+import { ImportPanel } from "@/components/recipes/import-panel";
 import { MyImports } from "@/components/recipes/my-imports";
-import { PhotoImportButton } from "@/components/recipes/photo-import-button";
 import { RecipeBrowser } from "@/components/recipes/recipe-browser";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { photoImportEnabled } from "@/lib/feature-flags";
@@ -15,7 +15,7 @@ export default function RecipesPage() {
         title="Recipes"
         description="Budget-friendly home cooking, plus anything you import from a link or a photo."
       />
-      <PhotoImportButton enabled={photoImportEnabled()} />
+      <ImportPanel photoEnabled={photoImportEnabled()} />
       <MyImports />
       <RecipeBrowser />
     </PageReveal>
