@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 13 of 112 complete · **Current:** M1 complete — next is task 13 (M2).
+**Status:** 18 of 112 complete · **Current:** M2 in progress — next is task 19.
 
 ## How to use
 
