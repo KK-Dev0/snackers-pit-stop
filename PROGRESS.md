@@ -30,7 +30,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 12. **Gate M1.** Run lint, typecheck, and build; smoke-check mobile and desktop; commit `feat: scaffold, design system, and landing page`.
 
 ### M2 — Data model, seed data, retrieval
-- [ ] 13. **Add env handling.** Zod-validated `src/lib/env.ts`, `.env.example`, and clear errors for missing server vars.
+- [x] 13. **Add env handling.** Zod-validated `src/lib/env.ts`, `.env.example`, and clear errors for missing server vars.
 - [ ] 14. **Wire the database.** Drizzle + `@libsql/client` with a local file URL in dev and Turso in prod; `drizzle.config.ts` and db scripts.
 - [ ] 15. **Model ingredients.** Drizzle table with nutrition per 100 g/ml, default INR price, aisle, base unit, diet/allergen tags, and staple flag.
 - [ ] 16. **Model recipes.** `recipes` and `recipe_ingredients` tables with diet, slots, servings, steps, source metadata, and normalized grams.
