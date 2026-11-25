@@ -13,6 +13,7 @@ import {
 import { usePantry } from "@/client/hooks/use-pantry";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { AisleSections } from "@/components/shopping-list/aisle-sections";
+import { ShoppingListItem } from "@/components/shopping-list/shopping-list-item";
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
@@ -190,6 +191,13 @@ export function ShoppingListView() {
   const totalCost = items.reduce((sum, item) => sum + (item.estimatedCostInr ?? 0), 0);
   const checkedCount = items.filter((item) => item.checked).length;
 
+  const toggleChecked = (key: string) => {
+    const next = new Set(listState?.checkedKeys ?? []);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    updateState({ checkedKeys: [...next] });
+  };
+
   if (!activePlan) {
     return (
       <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
@@ -247,8 +255,21 @@ export function ShoppingListView() {
                 <p className="text-sm text-muted-foreground tabular-nums">
                   {checkedCount} checked · approx ₹{totalCost.toFixed(0)}
                 </p>
+                <p aria-live="polite" className="sr-only">
+                  {checkedCount} of {items.length} items checked off.
+                </p>
               </div>
               <div className="flex items-center gap-2">
+                {checkedCount > 0 ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => updateState({ checkedKeys: [] })}
+                  >
+                    Reset checks
+                  </Button>
+                ) : null}
                 <Checkbox
                   id="include-staples"
                   checked={listState.includeStaples}
@@ -283,15 +304,7 @@ export function ShoppingListView() {
               savedOrder={listState.itemOrder}
               onMove={(next) => updateState({ itemOrder: next.map((item) => item.key) })}
               renderItem={(item) => (
-                <p className="text-sm">
-                  <span className={item.checked ? "text-muted-foreground line-through" : "font-medium"}>
-                    {item.name}
-                  </span>{" "}
-                  <span className="text-muted-foreground tabular-nums">
-                    {item.quantity} {item.unit}
-                    {item.estimatedCostInr === undefined ? "" : ` · ₹${item.estimatedCostInr}`}
-                  </span>
-                </p>
+                <ShoppingListItem item={item} onToggle={toggleChecked} />
               )}
             />
           )}

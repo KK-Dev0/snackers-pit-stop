@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 69 of 112 complete · **Current:** M5 in progress — next is task 89.
+**Status:** 70 of 112 complete · **Current:** M5 in progress — next is task 90.
 
 ## How to use
 
@@ -112,7 +112,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 86. **Subtract pantry.** Handle full and partial quantities, staples policy, and tests.
 - [x] 87. **Group by aisle.** Stable aisle order, manual reorder, and collapsed sections.
 - [x] 88. **Build the list page.** Generate from the active plan, show grouped items/counts, and handle the no-plan state.
-- [ ] 89. **Add check-off.** Animated check with strike-through, persisted state, reset, and aria-live updates.
+- [x] 89. **Add check-off.** Animated check with strike-through, persisted state, reset, and aria-live updates.
 - [ ] 90. **Add copy/share.** Web Share API with WhatsApp-friendly plain text and a clipboard fallback.
 - [ ] 91. **Add store handoff.** Per-ingredient and whole-list open-and-search links from templates with copy fallback; tests.
 - [ ] 92. **Gate M5.** Lint, typecheck, tests, and a manual plan→list pass; commit `feat: pantry and merged shopping list`.
