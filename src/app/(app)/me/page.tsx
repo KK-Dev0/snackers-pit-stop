@@ -10,6 +10,19 @@ import { useProfile } from "@/client/hooks/use-profile";
 import { getDb } from "@/client/db/dexie";
 import { Button } from "@/components/ui/button";
 
+function AboutLink() {
+  return (
+    <div className="text-sm">
+      <Link href="/about" className="text-primary underline underline-offset-4">
+        About &amp; disclaimers
+      </Link>
+      <p className="mt-1 text-muted-foreground">
+        Estimates, best-effort allergen filtering and store handoff explained.
+      </p>
+    </div>
+  );
+}
+
 export default function MePage() {
   const profile = useProfile();
 
@@ -37,6 +50,7 @@ export default function MePage() {
         <Link href="/onboarding" className="text-primary underline">
           Start onboarding
         </Link>
+        <AboutLink />
       </PageReveal>
     );
   }
@@ -77,6 +91,7 @@ export default function MePage() {
       <Link href="/onboarding" className="text-primary underline">
         Edit profile
       </Link>
+      <AboutLink />
 
       <div className="rounded-lg border bg-card p-6 space-y-3">
         <h2 className="font-semibold">Data</h2>

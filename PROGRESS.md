@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 102 of 111 complete · **Current:** M7 in progress — next is task 103.
+**Status:** 103 of 111 complete · **Current:** M7 in progress — next is task 104.
 
 ## How to use
 
@@ -130,7 +130,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 ### M7 — Polish, tests, PWA, README
 - [x] 101. **Add the PWA manifest.** Name, icons (192/512/maskable), theme colors, standalone display, and install metadata.
 - [x] 102. **Add the service worker.** Serwist offline shell, static caching, network-first API fallback, and an offline banner.
-- [ ] 103. **Add the About and Disclaimers page.** Not medical advice, estimates only, allergen filtering is best-effort, no affiliation with listed stores; link it from the footer and Me.
+- [x] 103. **Add the About and Disclaimers page.** Not medical advice, estimates only, allergen filtering is best-effort, no affiliation with listed stores; link it from the footer and Me.
 - [ ] 104. **Accessibility audit.** Keyboard paths, focus-visible, labels/aria, heading order, live regions, and contrast fixes.
 - [ ] 105. **Dark mode audit.** Every screen, gauge, skeleton and toast; fix token misuse.
 - [ ] 106. **Motion audit.** Reduced-motion coverage, 400 ms cap on app screens, no layout jank, and skeleton timing.

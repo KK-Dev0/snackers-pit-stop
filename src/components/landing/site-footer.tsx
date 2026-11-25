@@ -45,6 +45,14 @@ export function SiteFooter() {
               Good to know
             </h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link
+                  href="/about"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  About &amp; disclaimers
+                </Link>
+              </li>
               <li>Nutrition and prices are estimates, not medical advice.</li>
               <li>Allergen filtering is best-effort — always check labels.</li>
               <li>No affiliation with any store listed in the app.</li>
