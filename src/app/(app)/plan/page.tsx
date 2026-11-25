@@ -9,10 +9,18 @@ import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { useProfile } from "@/client/hooks/use-profile";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { getDb } from "@/client/db/dexie";
-import { generatePlan } from "@/lib/planner";
+import { generatePlan, eligibleRecipes } from "@/lib/planner";
 import type { Ingredient, Recipe } from "@/lib/schemas";
 import { FuelGauge } from "@/components/common/fuel-gauge";
 import { recipeNutrition } from "@/lib/nutrition";
@@ -29,6 +37,7 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; slot: string } | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -102,6 +111,27 @@ export default function PlanPage() {
     }
   };
 
+  const replaceMeal = async (recipeId: string) => {
+    if (!swapTarget || !activePlanId) return;
+    const meal = meals.find(
+      (m) => m.dayIndex === swapTarget.dayIndex && m.slot === swapTarget.slot,
+    );
+    if (!meal) return;
+    const db = getDb();
+    await db.planMeals.put({ ...meal, recipeId });
+    setSwapTarget(null);
+  };
+
+  const alternatives = swapTarget
+    ? eligibleRecipes(
+        recipes,
+        swapTarget.slot,
+        profile?.diet,
+        [...(profile?.allergens ?? [])],
+        [...(profile?.dislikes ?? [])],
+      ).slice(0, 8)
+    : [];
+
   if (profile === undefined || plans === undefined) {
     return (
       <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
@@ -160,7 +190,18 @@ export default function PlanPage() {
                   );
                   return (
                     <div key={slot} className="rounded-md bg-muted p-2 text-sm">
-                      <span className="text-muted-foreground">{slot}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-muted-foreground">{slot}</span>
+                        {meal && (
+                          <button
+                            type="button"
+                            className="text-xs text-primary underline"
+                            onClick={() => setSwapTarget({ dayIndex, slot })}
+                          >
+                            Swap
+                          </button>
+                        )}
+                      </div>
                       <p className="truncate">{meal ? meal.recipeId : "—"}</p>
                     </div>
                   );
@@ -170,6 +211,36 @@ export default function PlanPage() {
           ))}
         </div>
       )}
+
+      <Sheet open={!!swapTarget} onOpenChange={(open) => !open && setSwapTarget(null)}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Swap meal</SheetTitle>
+            <SheetDescription>
+              Choose an alternative {swapTarget?.slot} from your ranked recipes.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-4 space-y-2">
+            {alternatives.map((r) => {
+              const preview = mealStats(r.id, 1);
+              return (
+                <SheetClose asChild key={r.id}>
+                  <button
+                    type="button"
+                    onClick={() => replaceMeal(r.id)}
+                    className="w-full rounded-md border p-3 text-left hover:bg-muted"
+                  >
+                    <p className="font-medium">{r.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {preview.kcal} kcal · ₹{preview.cost.toFixed(0)}
+                    </p>
+                  </button>
+                </SheetClose>
+              );
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
     </PageReveal>
   );
 }
