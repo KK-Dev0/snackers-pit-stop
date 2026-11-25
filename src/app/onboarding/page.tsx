@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 // no radio-group component; use buttons instead
 import { Input } from "@/components/ui/input";
 import { saveProfile } from "@/client/db/repos/profile";
+import { useStores } from "@/client/hooks/use-stores";
 import { PincodeField } from "@/components/stores/pincode-field";
+import { StorePicker } from "@/components/stores/store-picker";
 import { isPincode } from "@/lib/geo";
 import type { Profile } from "@/lib/schemas";
 
@@ -28,6 +30,8 @@ export default function OnboardingPage() {
   const [dislikes, setDislikes] = useState("");
   const [pincode, setPincode] = useState("");
   const [storeIds, setStoreIds] = useState<string[]>([]);
+  const [customStoreName, setCustomStoreName] = useState<string>("");
+  const { items: stores, hasAvailabilityData, loading } = useStores(pincode);
 
   const skip = () => router.push("/plan");
 
@@ -49,6 +53,7 @@ export default function OnboardingPage() {
         .filter(Boolean),
       pincode: isPincode(pincode) ? pincode : undefined,
       storeIds,
+      customStoreName: customStoreName || undefined,
       onboardedAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -151,20 +156,27 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="mt-4 space-y-4">
             <PincodeField value={pincode} onChange={setPincode} />
-            <div>
-              <Label>Store ids (comma separated)</Label>
-              <Input
-                value={storeIds.join(", ")}
-                onChange={(e) =>
-                  setStoreIds(
-                    e.target.value
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  )
-                }
-              />
-            </div>
+            {isPincode(pincode) ? (
+              loading && stores.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Loading stores…</p>
+              ) : (
+                <StorePicker
+                  pincode={pincode}
+                  stores={stores}
+                  hasAvailabilityData={hasAvailabilityData}
+                  selectedIds={storeIds}
+                  onChange={(ids, customName) => {
+                    setStoreIds(ids);
+                    setCustomStoreName(customName ?? "");
+                  }}
+                  onCustomNameChange={setCustomStoreName}
+                />
+              )
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Enter a valid pincode to pick the stores you use.
+              </p>
+            )}
           </div>
         )}
       </section>
