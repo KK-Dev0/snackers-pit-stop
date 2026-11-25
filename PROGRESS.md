@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 66 of 112 complete · **Current:** M5 in progress — next is task 86.
+**Status:** 67 of 112 complete · **Current:** M5 in progress — next is task 87.
 
 ## How to use
 
@@ -109,7 +109,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 83. **Add "use it up".** Rank recipes by pantry overlap and surface them on Pantry with reasons.
 - [x] 84. **Normalize and merge ingredients.** Alias mapping, canonical units and merge rules; unit tests.
 - [x] 85. **Build the shopping list generator.** Scale plan ingredients, merge, convert/combine units, and test edge cases.
-- [ ] 86. **Subtract pantry.** Handle full and partial quantities, staples policy, and tests.
+- [x] 86. **Subtract pantry.** Handle full and partial quantities, staples policy, and tests.
 - [ ] 87. **Group by aisle.** Stable aisle order, manual reorder, and collapsed sections.
 - [ ] 88. **Build the list page.** Generate from the active plan, show grouped items/counts, and handle the no-plan state.
 - [ ] 89. **Add check-off.** Animated check with strike-through, persisted state, reset, and aria-live updates.

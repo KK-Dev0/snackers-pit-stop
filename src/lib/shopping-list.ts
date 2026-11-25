@@ -3,7 +3,7 @@ import { matchIngredientByName, normalizeIngredientName } from "./ingredient-mat
 import { computeNutrition } from "./nutrition";
 import { slugify } from "./slug";
 import { convertQuantity, unitFamily } from "./units";
-import type { Aisle, Ingredient, ShoppingItem, ShoppingList, Unit } from "./schemas";
+import type { Aisle, Ingredient, PantryItem, ShoppingItem, ShoppingList, Unit } from "./schemas";
 
 export type MergeableIngredient = {
   name: string;
@@ -197,3 +197,79 @@ export function generateShoppingList(input: GenerateShoppingListInput): Shopping
 }
 
 export const buildShoppingList = generateShoppingList;
+
+export type SubtractPantryOptions = {
+  pantry: PantryItem[];
+  ingredients: Ingredient[];
+  /** By default staples are assumed to be on hand and left off the list. */
+  includeStaples?: boolean;
+};
+
+function isStapleItem(item: ShoppingItem, options: SubtractPantryOptions): boolean {
+  const catalogItem = item.ingredientId
+    ? options.ingredients.find((ingredient) => ingredient.id === item.ingredientId)
+    : undefined;
+  if (catalogItem?.isStaple) return true;
+  const name = normalizeIngredientName(item.name);
+  return options.pantry.some(
+    (entry) => entry.isStaple && normalizeIngredientName(entry.name) === name,
+  );
+}
+
+/**
+ * Subtract what is already on the shelf. Full matches disappear; partial
+ * matches reduce both the quantity and its cost/kcal estimates proportionally.
+ */
+export function subtractPantry(
+  items: ShoppingItem[],
+  options: SubtractPantryOptions,
+): ShoppingItem[] {
+  const remaining: ShoppingItem[] = [];
+  for (const item of items) {
+    const staple = isStapleItem(item, options);
+    if (staple && !options.includeStaples) continue;
+
+    const name = normalizeIngredientName(item.name);
+    const ingredient = item.ingredientId
+      ? options.ingredients.find((value) => value.id === item.ingredientId) ?? null
+      : null;
+    const matches = options.pantry.filter((entry) => {
+      if (item.ingredientId && entry.ingredientId) {
+        return entry.ingredientId === item.ingredientId;
+      }
+      return normalizeIngredientName(entry.name) === name;
+    });
+
+    let available = 0;
+    for (const entry of matches) {
+      const converted = convertQuantity(
+        entry.quantity,
+        entry.unit,
+        item.unit,
+        ingredient?.pieceGrams ?? undefined,
+      );
+      if (converted !== null && Number.isFinite(converted)) available += converted;
+    }
+
+    const left = item.quantity - available;
+    if (left <= 0.001) continue;
+    const ratio = item.quantity > 0 ? Math.min(1, left / item.quantity) : 1;
+    remaining.push({
+      ...item,
+      quantity: round2(left),
+      estimatedCostInr:
+        item.estimatedCostInr === undefined ? undefined : round2(item.estimatedCostInr * ratio),
+      estimatedKcal:
+        item.estimatedKcal === undefined ? undefined : Math.round(item.estimatedKcal * ratio),
+    });
+  }
+  return remaining;
+}
+
+/** Convenience wrapper that keeps the rest of a generated list intact. */
+export function subtractPantryFromList(
+  list: ShoppingList,
+  options: SubtractPantryOptions,
+): ShoppingList {
+  return { ...list, items: subtractPantry(list.items, options) };
+}

@@ -6,8 +6,15 @@ import {
   ingredientKey,
   mergeIngredients,
   resolveIngredient,
+  subtractPantry,
 } from "@/lib/shopping-list";
-import { IngredientSchema, type Ingredient } from "@/lib/schemas";
+import {
+  IngredientSchema,
+  PantryItemSchema,
+  type Ingredient,
+  type PantryItem,
+  type ShoppingItem,
+} from "@/lib/schemas";
 
 function ingredient(overrides: Partial<Ingredient> & Pick<Ingredient, "id" | "name">): Ingredient {
   return IngredientSchema.parse({
@@ -18,6 +25,27 @@ function ingredient(overrides: Partial<Ingredient> & Pick<Ingredient, "id" | "na
     priceBasis: "100g",
     ...overrides,
   });
+}
+
+function pantryItem(
+  overrides: Partial<PantryItem> & Pick<PantryItem, "id" | "name">,
+): PantryItem {
+  return PantryItemSchema.parse({
+    normalizedName: overrides.name.toLowerCase(),
+    quantity: 1,
+    unit: "g",
+    isStaple: false,
+    createdAt: 1,
+    updatedAt: 1,
+    ...overrides,
+  });
+}
+
+function shoppingItem(
+  overrides: Partial<ShoppingItem> &
+    Pick<ShoppingItem, "key" | "name" | "quantity" | "unit" | "aisle">,
+): ShoppingItem {
+  return { checked: false, ...overrides };
 }
 
 const catalog: Ingredient[] = [
@@ -204,5 +232,89 @@ describe("shopping list generation", () => {
       removedKeys: [],
       customItems: [],
     });
+  });
+});
+
+describe("pantry subtraction", () => {
+  const options = { ingredients: catalog };
+  const rice = shoppingItem({
+    key: "rice:g",
+    name: "Rice",
+    ingredientId: "rice",
+    quantity: 1000,
+    unit: "g",
+    aisle: "staples",
+    estimatedCostInr: 100,
+    estimatedKcal: 1300,
+  });
+
+  it("removes lines fully covered by the pantry", () => {
+    const result = subtractPantry([rice], {
+      ...options,
+      pantry: [pantryItem({ id: "p1", name: "Rice", ingredientId: "rice", quantity: 1, unit: "kg" })],
+    });
+    expect(result).toEqual([]);
+  });
+
+  it("reduces quantities and estimates for partial coverage", () => {
+    const result = subtractPantry([rice], {
+      ...options,
+      pantry: [pantryItem({ id: "p1", name: "Rice", ingredientId: "rice", quantity: 200, unit: "g" })],
+    });
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      quantity: 800,
+      estimatedCostInr: 80,
+      estimatedKcal: 1040,
+    });
+  });
+
+  it("omits staples by default and includes them on request", () => {
+    const saltCatalog = [
+      ...catalog,
+      ingredient({ id: "salt", name: "Salt", isStaple: true }),
+    ];
+    const salt = shoppingItem({
+      key: "salt:g",
+      name: "Salt",
+      ingredientId: "salt",
+      quantity: 100,
+      unit: "g",
+      aisle: "spices",
+    });
+    expect(subtractPantry([salt], { ...options, ingredients: saltCatalog, pantry: [] })).toEqual([]);
+    expect(
+      subtractPantry([salt], {
+        ...options,
+        ingredients: saltCatalog,
+        pantry: [],
+        includeStaples: true,
+      }),
+    ).toEqual([salt]);
+  });
+
+  it("ignores pantry entries in incompatible units", () => {
+    const result = subtractPantry([rice], {
+      ...options,
+      pantry: [
+        pantryItem({ id: "p1", name: "Rice", ingredientId: "rice", quantity: 2, unit: "piece" }),
+      ],
+    });
+    expect(result).toEqual([rice]);
+  });
+
+  it("matches unmatched list lines by name", () => {
+    const leaves = shoppingItem({
+      key: "mystery-leaves:piece",
+      name: "mystery leaves",
+      quantity: 2,
+      unit: "piece",
+      aisle: "other",
+    });
+    const result = subtractPantry([leaves], {
+      ...options,
+      pantry: [pantryItem({ id: "p1", name: "Mystery leaves", quantity: 1, unit: "piece" })],
+    });
+    expect(result[0]).toMatchObject({ quantity: 1 });
   });
 });
