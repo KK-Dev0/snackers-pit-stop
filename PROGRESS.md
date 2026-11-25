@@ -43,7 +43,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 23. **Seed recipes 1/13.** Five budget breakfasts (poha, upma, besan chilla, masala oats, veg sandwich) with structured ingredients and steps.
 - [x] 24. **Seed recipes 2/13.** Five breakfasts (aloo paratha, idli-sambar, egg bhurji toast, rava dosa, thepla).
 - [x] 25. **Seed recipes 3/13.** Five veg lunch/dinner dishes (dal tadka rice, rajma chawal, chole roti, mixed veg sabzi, curd rice).
-- [ ] 26. **Seed recipes 4/13.** Five veg dishes (palak paneer, aloo gobi, bhindi masala, lauki dal, veg pulao).
+- [x] 26. **Seed recipes 4/13.** Five veg dishes (palak paneer, aloo gobi, bhindi masala, lauki dal, veg pulao).
 - [ ] 27. **Seed recipes 5/13.** Five veg dishes (paneer bhurji, baingan bharta, cabbage poriyal, budget dal makhani, tomato rice).
 - [ ] 28. **Seed recipes 6/13.** Five eggetarian dishes (egg curry, egg fried rice, egg roast, omelette wrap, egg chaat).
 - [ ] 29. **Seed recipes 7/13.** Five non-veg dishes (chicken curry, chicken keema, fish curry, chicken stew, chilli chicken).
