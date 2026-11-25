@@ -1,48 +1,58 @@
-import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react";
+"use client";
 
-import { Wordmark } from "@/components/layout/wordmark";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
-export const metadata = { title: "Get started" };
+const STEPS = ["Diet", "Goals", "Preferences", "Location & stores"];
 
 export default function OnboardingPage() {
+  const router = useRouter();
+  const [step, setStep] = useState(0);
+
+  const skip = () => {
+    router.push("/plan");
+  };
+
+  const next = () => {
+    if (step < STEPS.length - 1) setStep(step + 1);
+    else router.push("/plan");
+  };
+
+  const back = () => {
+    if (step > 0) setStep(step - 1);
+  };
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-5 sm:px-6">
-        <Wordmark />
-        <ThemeToggle />
-      </header>
+    <main className="mx-auto max-w-md px-4 py-8">
+      <div className="mb-6">
+        <Progress value={((step + 1) / STEPS.length) * 100} />
+        <p className="mt-2 text-sm text-muted-foreground">
+          Step {step + 1} of {STEPS.length}: {STEPS[step]}
+        </p>
+      </div>
 
-      <main id="main-content" className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-6 px-5 py-12 sm:px-6">
-        <div className="space-y-3">
-          <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
-            Four quick steps · skippable
-          </p>
-          <h1 className="font-display text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-5xl">
-            Let&apos;s set up your pit stop.
-          </h1>
-          <p className="max-w-xl text-base text-pretty text-muted-foreground">
-            Diet, calories, budget, allergens, location and the shops you use. All of it stays on
-            this device.
-          </p>
-        </div>
+      <section className="rounded-lg border bg-card p-6">
+        <h1 className="text-xl font-semibold">{STEPS[step]}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Onboarding step content coming soon.
+        </p>
+      </section>
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-          <h2 className="font-display text-xl font-semibold">Wizard coming next</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            The setup wizard arrives with the onboarding milestone. Until then you can head straight
-            to the app.
-          </p>
-          <Button asChild className="mt-4">
-            <Link href="/plan">
-              Continue to Plan
-              <ArrowRightIcon aria-hidden="true" />
-            </Link>
-          </Button>
+      <div className="mt-6 flex items-center justify-between">
+        <Button variant="ghost" onClick={skip}>
+          Skip
+        </Button>
+        <div className="flex gap-2">
+          {step > 0 && (
+            <Button variant="outline" onClick={back}>
+              Back
+            </Button>
+          )}
+          <Button onClick={next}>{step === STEPS.length - 1 ? "Finish" : "Next"}</Button>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
