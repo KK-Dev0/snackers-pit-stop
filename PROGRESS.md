@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 72 of 112 complete · **Current:** M5 in progress — next is task 92.
+**Status:** 73 of 112 complete · **Current:** M5 complete — next is task 93.
 
 ## How to use
 
@@ -115,7 +115,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 89. **Add check-off.** Animated check with strike-through, persisted state, reset, and aria-live updates.
 - [x] 90. **Add copy/share.** Web Share API with WhatsApp-friendly plain text and a clipboard fallback.
 - [x] 91. **Add store handoff.** Per-ingredient and whole-list open-and-search links from templates with copy fallback; tests.
-- [ ] 92. **Gate M5.** Lint, typecheck, tests, and a manual plan→list pass; commit `feat: pantry and merged shopping list`.
+- [x] 92. **Gate M5.** Lint, typecheck, tests, and a manual plan→list pass; commit `feat: pantry and merged shopping list`.
 
 ### M6 — Location and stores
 - [ ] 93. **Build the geo interface.** Swappable provider + Nominatim reverse geocoder honoring the UA policy and 1 req/s, with manual pincode fallback.
