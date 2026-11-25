@@ -18,6 +18,15 @@ export type GeolocationErrorCode =
   | "timeout"
   | "unavailable";
 
+/** Map the browser's numeric PositionError codes to our UI states. */
+export function geolocationErrorCode(
+  error: { code?: number } | null | undefined,
+): GeolocationErrorCode {
+  if (error?.code === 1) return "permission_denied";
+  if (error?.code === 3) return "timeout";
+  return "unavailable";
+}
+
 /** User-facing copy for browser geolocation failures. */
 export function geolocationErrorMessage(code: GeolocationErrorCode): string {
   switch (code) {

@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 // no radio-group component; use buttons instead
 import { Input } from "@/components/ui/input";
 import { saveProfile } from "@/client/db/repos/profile";
+import { PincodeField } from "@/components/stores/pincode-field";
+import { isPincode } from "@/lib/geo";
 import type { Profile } from "@/lib/schemas";
 
 const STEPS = ["Diet", "Goals", "Preferences", "Location & stores"];
@@ -45,7 +47,7 @@ export default function OnboardingPage() {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
-      pincode: pincode || undefined,
+      pincode: isPincode(pincode) ? pincode : undefined,
       storeIds,
       onboardedAt: Date.now(),
       updatedAt: Date.now(),
@@ -148,10 +150,7 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <div className="mt-4 space-y-4">
-            <div>
-              <Label>Pincode</Label>
-              <Input value={pincode} onChange={(e) => setPincode(e.target.value)} />
-            </div>
+            <PincodeField value={pincode} onChange={setPincode} />
             <div>
               <Label>Store ids (comma separated)</Label>
               <Input
