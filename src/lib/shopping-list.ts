@@ -1,7 +1,9 @@
+import { ingredientCost, type PriceOverride } from "./cost";
 import { matchIngredientByName, normalizeIngredientName } from "./ingredient-match";
+import { computeNutrition } from "./nutrition";
 import { slugify } from "./slug";
 import { convertQuantity, unitFamily } from "./units";
-import type { Aisle, Ingredient, Unit } from "./schemas";
+import type { Aisle, Ingredient, ShoppingItem, ShoppingList, Unit } from "./schemas";
 
 export type MergeableIngredient = {
   name: string;
@@ -114,3 +116,84 @@ export function mergeIngredients(
   }
   return [...merged.values()];
 }
+
+export type PlanMealForList = {
+  recipeId: string;
+  /** Servings actually planned for this meal. */
+  servings: number;
+  /** Servings the recipe quantities were written for. */
+  baseServings: number;
+  ingredients: Array<{
+    rawName: string;
+    ingredientId?: string | null;
+    quantity: number;
+    unit: Unit;
+  }>;
+};
+
+export type GenerateShoppingListInput = {
+  planId: string;
+  meals: PlanMealForList[];
+  ingredients: Ingredient[];
+  priceOverrides?: Map<string, PriceOverride> | Record<string, PriceOverride>;
+};
+
+function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Scale every planned meal to its servings, then merge duplicate ingredients.
+ * Estimates are attached only when the line matched a catalog ingredient.
+ */
+export function generateShoppingList(input: GenerateShoppingListInput): ShoppingList {
+  const lines: MergeableIngredient[] = [];
+  for (const meal of input.meals) {
+    const scale = meal.baseServings > 0 ? meal.servings / meal.baseServings : 1;
+    for (const item of meal.ingredients) {
+      lines.push({
+        name: item.rawName,
+        ingredientId: item.ingredientId ?? null,
+        quantity: item.quantity * scale,
+        unit: item.unit,
+      });
+    }
+  }
+
+  const items: ShoppingItem[] = mergeIngredients(lines, input.ingredients).map((item) => {
+    const override =
+      input.priceOverrides instanceof Map
+        ? input.priceOverrides.get(item.ingredientId ?? "")
+        : item.ingredientId
+          ? input.priceOverrides?.[item.ingredientId]
+          : undefined;
+    const cost = item.ingredient
+      ? ingredientCost(item.ingredient, item.quantity, item.unit, override)
+      : null;
+    const kcal = item.ingredient
+      ? computeNutrition(item.ingredient, item.quantity, item.unit)?.kcal
+      : null;
+    return {
+      key: item.key,
+      name: item.name,
+      ingredientId: item.ingredientId,
+      quantity: round2(item.quantity),
+      unit: item.unit,
+      aisle: item.aisle,
+      checked: false,
+      estimatedCostInr: cost === null ? undefined : round2(cost),
+      estimatedKcal: kcal ?? undefined,
+    };
+  });
+
+  return {
+    planId: input.planId,
+    items,
+    includeStaples: false,
+    checkedKeys: [],
+    removedKeys: [],
+    customItems: [],
+  };
+}
+
+export const buildShoppingList = generateShoppingList;

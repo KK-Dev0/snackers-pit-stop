@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   canonicalizeIngredient,
+  generateShoppingList,
   ingredientKey,
   mergeIngredients,
   resolveIngredient,
@@ -121,5 +122,87 @@ describe("ingredient normalization and merging", () => {
       catalog,
     );
     expect(merged.map((item) => item.key)).toEqual(["milk:ml", "tomato:piece"]);
+  });
+});
+
+describe("shopping list generation", () => {
+  const base = { planId: "plan-1", ingredients: catalog };
+
+  it("scales ingredients from the recipe base servings to planned servings", () => {
+    const list = generateShoppingList({
+      ...base,
+      meals: [
+        {
+          recipeId: "rice-bowl",
+          servings: 4,
+          baseServings: 2,
+          ingredients: [{ rawName: "Rice", ingredientId: "rice", quantity: 200, unit: "g" }],
+        },
+      ],
+    });
+    expect(list.items).toHaveLength(1);
+    expect(list.items[0]).toMatchObject({
+      key: "rice:g",
+      quantity: 400,
+      unit: "g",
+      aisle: "staples",
+      estimatedKcal: 520,
+      estimatedCostInr: 200,
+    });
+  });
+
+  it("merges repeated meals and mixed units into one line", () => {
+    const list = generateShoppingList({
+      ...base,
+      meals: [
+        {
+          recipeId: "rice-bowl",
+          servings: 2,
+          baseServings: 2,
+          ingredients: [{ rawName: "Rice", ingredientId: "rice", quantity: 1, unit: "kg" }],
+        },
+        {
+          recipeId: "pulao",
+          servings: 2,
+          baseServings: 2,
+          ingredients: [{ rawName: "chawal", ingredientId: null, quantity: 250, unit: "g" }],
+        },
+      ],
+    });
+    expect(list.items).toHaveLength(1);
+    expect(list.items[0]).toMatchObject({ quantity: 1250, unit: "g" });
+  });
+
+  it("applies price overrides and keeps unmatched lines estimate-free", () => {
+    const list = generateShoppingList({
+      ...base,
+      priceOverrides: new Map([["rice", { priceInr: 80, priceBasis: "100g" }]]),
+      meals: [
+        {
+          recipeId: "mystery",
+          servings: 1,
+          baseServings: 1,
+          ingredients: [
+            { rawName: "Rice", ingredientId: "rice", quantity: 500, unit: "g" },
+            { rawName: "Mystery leaves", ingredientId: null, quantity: 1, unit: "piece" },
+          ],
+        },
+      ],
+    });
+    expect(list.items[0].estimatedCostInr).toBe(400);
+    expect(list.items[1]).toMatchObject({ name: "mystery leaves", ingredientId: null });
+    expect(list.items[1].estimatedCostInr).toBeUndefined();
+    expect(list.items[1].estimatedKcal).toBeUndefined();
+  });
+
+  it("returns an empty, valid list with no meals", () => {
+    expect(generateShoppingList({ ...base, meals: [] })).toEqual({
+      planId: "plan-1",
+      items: [],
+      includeStaples: false,
+      checkedKeys: [],
+      removedKeys: [],
+      customItems: [],
+    });
   });
 });
