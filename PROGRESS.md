@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 74 of 112 complete · **Current:** M6 in progress — next is task 94.
+**Status:** 75 of 112 complete · **Current:** M6 in progress — next is task 95.
 
 ## How to use
 
@@ -119,7 +119,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 
 ### M6 — Location and stores
 - [x] 93. **Build the geo interface.** Swappable provider + Nominatim reverse geocoder honoring the UA policy and 1 req/s, with manual pincode fallback.
-- [ ] 94. **Add the reverse-geocode route.** `POST /api/geo/reverse` validates coordinates and returns only pincode/city/state; tests.
+- [x] 94. **Add the reverse-geocode route.** `POST /api/geo/reverse` validates coordinates and returns only pincode/city/state; tests.
 - [ ] 95. **Add location UX.** "Use my location" with permission/denied/timeout states; store the pincode only, never coordinates.
 - [ ] 96. **Add the stores API.** `GET /api/stores?pincode=` returns seeded stores with confirmed/unconfirmed status and counts.
 - [ ] 97. **Build the store picker.** Toggles, "Do you use this here?", custom kirana rename, and the crowdsourcing note.
