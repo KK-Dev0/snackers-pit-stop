@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { RecipeListQuerySchema } from "@/lib/schemas";
+import { sortRecipes } from "@/lib/recipe-sort";
 import { listRecipesWithIngredients } from "@/server/db/queries/recipes";
 import { getDb } from "@/server/db/client";
 
@@ -63,6 +64,8 @@ export async function GET(request: NextRequest) {
         .includes(needle),
     );
   }
+
+  items = sortRecipes(items, q.sort);
 
   const total = items.length;
   const paged = items.slice(q.offset, q.offset + q.limit);

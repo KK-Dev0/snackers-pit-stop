@@ -11,6 +11,7 @@ export const RecipeListQuerySchema = z.object({
   tag: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0),
+  sort: z.enum(["recent", "title", "time"]).default("recent"),
 });
 
 export const RecipeBySlugParamsSchema = z.object({

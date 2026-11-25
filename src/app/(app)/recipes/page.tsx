@@ -1,9 +1,7 @@
-import { ChefHatIcon } from "lucide-react";
-
-import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { MyImports } from "@/components/recipes/my-imports";
 import { PhotoImportButton } from "@/components/recipes/photo-import-button";
+import { RecipeBrowser } from "@/components/recipes/recipe-browser";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { photoImportEnabled } from "@/lib/feature-flags";
 
@@ -19,11 +17,7 @@ export default function RecipesPage() {
       />
       <PhotoImportButton enabled={photoImportEnabled()} />
       <MyImports />
-      <EmptyState
-        icon={ChefHatIcon}
-        title="The catalog is on its way"
-        description="Search, filters and recipe detail land once the seed catalog is wired up."
-      />
+      <RecipeBrowser />
     </PageReveal>
   );
 }
