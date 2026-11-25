@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 import "./globals.css";
 
@@ -19,9 +18,23 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Snackers Pit Stop",
+  applicationName: "Snackers Pit Stop",
+  title: {
+    default: "Snackers Pit Stop",
+    template: "%s · Snackers Pit Stop",
+  },
   description:
     "Plan a week of affordable meals around your diet, calories and pantry — then shop once.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf4e8" },
+    { media: "(prefers-color-scheme: dark)", color: "#121713" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,10 +45,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body>
+        <a
+          href="#main-content"
+          className="sr-only rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
+        >
+          Skip to content
+        </a>
         <ThemeProvider>{children}</ThemeProvider>
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
       </body>
     </html>
   );
