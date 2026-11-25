@@ -82,7 +82,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 60. **Build the planner page.** 7-day grid with meal cards, skeletons, an empty state, and a "Generate plan" action.
 - [x] 61. **Add day and week meters.** Per-day calories/cost plus a fuel-gauge weekly budget meter with accessible values.
 - [x] 62. **Add meal swap.** Bottom sheet with ranked alternatives, nutrition/cost preview, and one-tap replace.
-- [ ] 63. **Add meal lock + regenerate.** Lock/unlock meals and regenerate the rest without touching locked slots.
+- [x] 63. **Add meal lock + regenerate.** Lock/unlock meals and regenerate the rest without touching locked slots.
 - [ ] 64. **Add drag reorder.** dnd-kit drag between slots/days with layout animation and keyboard support.
 - [ ] 65. **Persist and navigate weeks.** Save plans/meals in Dexie, add prev/current/next week switching and "copy last week".
 - [ ] 66. **Gate M3.** Lint, typecheck, unit tests, and a manual onboarding→plan pass; commit `feat: onboarding and weekly planner`.

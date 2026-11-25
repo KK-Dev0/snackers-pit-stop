@@ -122,6 +122,45 @@ export default function PlanPage() {
     setSwapTarget(null);
   };
 
+  const toggleLock = async (mealId: string) => {
+    const meal = meals.find((m) => m.id === mealId);
+    if (!meal) return;
+    const db = getDb();
+    await db.planMeals.put({ ...meal, locked: !meal.locked });
+  };
+
+  const regenerate = async () => {
+    if (!profile || !activePlanId) return;
+    setLoading(true);
+    try {
+      const plan = plans.find((p) => p.id === activePlanId);
+      const locks = meals
+        .filter((m) => m.locked)
+        .map((m) => ({
+          dayIndex: m.dayIndex,
+          slot: m.slot,
+          recipeId: m.recipeId,
+          recipeSource: m.recipeSource,
+          servings: m.servings,
+        }));
+      const { plan: newPlan, meals: generated } = generatePlan({
+        recipes,
+        diet: profile.diet,
+        allergens: [...profile.allergens],
+        dislikes: [...profile.dislikes],
+        servings: profile.servings,
+        seed: `${plan?.weekStart ?? "week"}-${Date.now()}`,
+        weekStart: plan?.weekStart ?? new Date().toISOString().slice(0, 10),
+        locks,
+      });
+      const db = getDb();
+      await db.planMeals.where("planId").equals(newPlan.id).delete();
+      await db.planMeals.bulkPut(generated);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const alternatives = swapTarget
     ? eligibleRecipes(
         recipes,
@@ -149,6 +188,13 @@ export default function PlanPage() {
         description="Breakfast, lunch, snack and dinner for seven days — built around your diet, calories and budget."
       />
       <div className="flex justify-end">
+        <Button
+          variant="outline"
+          onClick={regenerate}
+          disabled={loading || !profile || meals.length === 0}
+        >
+          Regenerate
+        </Button>
         <Button onClick={generate} disabled={loading || !profile}>
           {loading ? "Generating…" : "Generate plan"}
         </Button>
@@ -193,13 +239,22 @@ export default function PlanPage() {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-muted-foreground">{slot}</span>
                         {meal && (
-                          <button
-                            type="button"
-                            className="text-xs text-primary underline"
-                            onClick={() => setSwapTarget({ dayIndex, slot })}
-                          >
-                            Swap
-                          </button>
+                          <span className="flex gap-2">
+                            <button
+                              type="button"
+                              className="text-xs text-primary underline"
+                              onClick={() => toggleLock(meal.id)}
+                            >
+                              {meal.locked ? "Unlock" : "Lock"}
+                            </button>
+                            <button
+                              type="button"
+                              className="text-xs text-primary underline"
+                              onClick={() => setSwapTarget({ dayIndex, slot })}
+                            >
+                              Swap
+                            </button>
+                          </span>
                         )}
                       </div>
                       <p className="truncate">{meal ? meal.recipeId : "—"}</p>
