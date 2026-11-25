@@ -23,6 +23,7 @@ export interface ShoppingListStateRecord {
   checkedKeys: string[];
   customItems: unknown[];
   removedKeys: string[];
+  itemOrder: string[];
   includeStaples: boolean;
   updatedAt: number;
 }

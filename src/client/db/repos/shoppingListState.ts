@@ -1,13 +1,4 @@
-import { getDb } from "../dexie";
-
-export interface ShoppingListStateRecord {
-  planId: string;
-  checkedKeys: string[];
-  customItems: unknown[];
-  removedKeys: string[];
-  includeStaples: boolean;
-  updatedAt: number;
-}
+import { getDb, type ShoppingListStateRecord } from "../dexie";
 
 export async function getShoppingListState(planId: string): Promise<ShoppingListStateRecord | undefined> {
   const db = getDb();
