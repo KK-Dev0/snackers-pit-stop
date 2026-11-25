@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   index,
   integer,
+  primaryKey,
   real,
   sqliteTable,
   text,
@@ -106,5 +107,52 @@ export const recipeIngredients = sqliteTable(
     ),
     index("recipe_ingredients_recipe_idx").on(table.recipeId),
     index("recipe_ingredients_ingredient_idx").on(table.ingredientId),
+  ],
+);
+
+export const stores = sqliteTable(
+  "stores",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    type: text("type").notNull(),
+    linkTemplate: text("link_template"),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (table) => [index("stores_sort_order_idx").on(table.sortOrder)],
+);
+
+export const pincodeStores = sqliteTable(
+  "pincode_stores",
+  {
+    pincode: text("pincode").notNull(),
+    storeId: text("store_id")
+      .notNull()
+      .references(() => stores.id, { onDelete: "cascade" }),
+    confirmedCount: integer("confirmed_count").notNull().default(0),
+    lastConfirmedAt: integer("last_confirmed_at"),
+  },
+  (table) => [
+    primaryKey({ columns: [table.pincode, table.storeId] }),
+    index("pincode_stores_pincode_idx").on(table.pincode),
+  ],
+);
+
+export const storeConfirmations = sqliteTable(
+  "store_confirmations",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    pincode: text("pincode").notNull(),
+    storeId: text("store_id").notNull(),
+    ipHash: text("ip_hash").notNull(),
+    createdAt: integer("created_at").notNull().default(sql`(unixepoch() * 1000)`),
+  },
+  (table) => [
+    index("store_confirmations_pincode_store_idx").on(
+      table.pincode,
+      table.storeId,
+      table.createdAt,
+    ),
+    index("store_confirmations_ip_idx").on(table.ipHash, table.createdAt),
   ],
 );
