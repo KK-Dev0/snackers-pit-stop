@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 80 of 112 complete · **Current:** M6 in progress — next is task 100.
+**Status:** 81 of 112 complete · **Current:** M6 complete — next is task 101.
 
 ## How to use
 
@@ -125,7 +125,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 97. **Build the store picker.** Toggles, "Do you use this here?", custom kirana rename, and the crowdsourcing note.
 - [x] 98. **Add confirmation voting.** `POST /api/stores/confirm` with IP-hash rate limits, count increment, and tests.
 - [x] 99. **Integrate stores.** Use selections in onboarding and list handoff; the user's selection always wins.
-- [ ] 100. **Gate M6.** Lint, typecheck, tests, and a manual pincode flow; commit `feat: location and store availability`.
+- [x] 100. **Gate M6.** Lint, typecheck, tests, and a manual pincode flow; commit `feat: location and store availability`.
 
 ### M7 — Polish, tests, PWA, README
 - [ ] 101. **Add the PWA manifest.** Name, icons (192/512/maskable), theme colors, standalone display, and install metadata.
