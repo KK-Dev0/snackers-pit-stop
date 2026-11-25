@@ -35,7 +35,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 15. **Model ingredients.** Drizzle table with nutrition per 100 g/ml, default INR price, aisle, base unit, diet/allergen tags, and staple flag.
 - [x] 16. **Model recipes.** `recipes` and `recipe_ingredients` tables with diet, slots, servings, steps, source metadata, and normalized grams.
 - [x] 17. **Model stores.** `stores`, `pincode_stores`, and `store_confirmations` tables with indexes and no PII.
-- [ ] 18. **Add migrations + FTS5.** Generate the initial migration, create the `recipe_fts` virtual table, and add a rebuild step to the seed pipeline.
+- [x] 18. **Add migrations + FTS5.** Generate the initial migration, create the `recipe_fts` virtual table, and add a rebuild step to the seed pipeline.
 - [ ] 19. **Seed ingredients 1/4.** ~40 staples: grains, dals, flours, rice, oats and pasta with per-100 g nutrition and prices.
 - [ ] 20. **Seed ingredients 2/4.** ~40 produce and dairy items with aisle, unit, nutrition, and prices.
 - [ ] 21. **Seed ingredients 3/4.** ~40 spices, oils, condiments and aromatics with realistic small-unit prices.
