@@ -14,6 +14,7 @@ import { usePantry } from "@/client/hooks/use-pantry";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { AisleSections } from "@/components/shopping-list/aisle-sections";
 import { ShoppingListItem } from "@/components/shopping-list/shopping-list-item";
+import { StoreHandoff } from "@/components/shopping-list/store-handoff";
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
@@ -26,6 +27,7 @@ import {
   subtractPantryFromList,
 } from "@/lib/shopping-list";
 import { formatShoppingListText, shareText } from "@/lib/sharing";
+import { listSearchQuery } from "@/lib/store-links";
 import {
   IngredientListSchema,
   RecipeSchema,
@@ -36,6 +38,8 @@ import {
   type Recipe,
   type ShoppingItem,
   type ShoppingList,
+  StoreSchema,
+  type Store,
 } from "@/lib/schemas";
 import { formatWeekLabel, weekStartForDate } from "@/lib/weeks";
 
@@ -96,6 +100,7 @@ export function ShoppingListView() {
   const [catalog, setCatalog] = useState<Recipe[]>([]);
   const [localRecipes, setLocalRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [stores, setStores] = useState<Store[]>([]);
   const [listState, setListState] = useState<ShoppingListStateRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -107,18 +112,23 @@ export function ShoppingListView() {
     void Promise.all([
       fetch("/api/recipes?limit=100").then((response) => response.json()),
       fetch("/api/ingredients").then((response) => response.json()),
+      fetch("/api/stores").then((response) => response.json()),
     ])
-      .then(([recipeJson, ingredientJson]) => {
+      .then(([recipeJson, ingredientJson, storeJson]) => {
         const recipeData = RecipeSchema.array().safeParse(
           (recipeJson as JsonShape).items ?? [],
         );
         const ingredientData = IngredientListSchema.safeParse(
           (ingredientJson as JsonShape).items ?? [],
         );
+        const storeData = StoreSchema.array().safeParse((storeJson as JsonShape).items ?? []);
         if (!active) return;
-        if (!recipeData.success || !ingredientData.success) throw new Error("Bad response");
+        if (!recipeData.success || !ingredientData.success || !storeData.success) {
+          throw new Error("Bad response");
+        }
         setCatalog(recipeData.data);
         setIngredients(ingredientData.data);
+        setStores(storeData.data);
         setError(false);
       })
       .catch(() => active && setError(true))
@@ -276,7 +286,13 @@ export function ShoppingListView() {
                   {checkedCount} of {items.length} items checked off.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <StoreHandoff
+                  stores={stores}
+                  query={listSearchQuery(items, listState?.itemOrder)}
+                  items={items}
+                  savedOrder={listState?.itemOrder}
+                />
                 <Button
                   type="button"
                   variant="outline"
@@ -333,7 +349,19 @@ export function ShoppingListView() {
               savedOrder={listState.itemOrder}
               onMove={(next) => updateState({ itemOrder: next.map((item) => item.key) })}
               renderItem={(item) => (
-                <ShoppingListItem item={item} onToggle={toggleChecked} />
+                <div className="flex items-center gap-1">
+                  <div className="min-w-0 flex-1">
+                    <ShoppingListItem item={item} onToggle={toggleChecked} />
+                  </div>
+                  <StoreHandoff
+                    stores={stores}
+                    query={item.name}
+                    items={[item]}
+                    savedOrder={[]}
+                    label="Find at"
+                    compact
+                  />
+                </div>
               )}
             />
           )}
