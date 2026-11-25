@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ingredients } from "../../scripts/seed-data/ingredients";
+import { stores, pincodeStores } from "../../scripts/seed-data/stores";
 
 describe("seed ingredients", () => {
   it("has unique ids and names", () => {
@@ -34,6 +35,21 @@ describe("seed ingredients", () => {
       if (ingredient.baseUnit === "piece") {
         expect(ingredient.priceBasis).toBe("piece");
       }
+    }
+  });
+});
+
+describe("seed stores", () => {
+  it("has the five seeded stores", () => {
+    expect(stores.length).toBe(5);
+    const ids = stores.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("has Asansol pincode availability rows", () => {
+    expect(pincodeStores.length).toBeGreaterThan(0);
+    for (const row of pincodeStores) {
+      expect(row.pincode).toMatch(/^[1-9][0-9]{5}$/);
     }
   });
 });
