@@ -40,7 +40,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 20. **Seed ingredients 2/4.** ~40 produce and dairy items with aisle, unit, nutrition, and prices.
 - [x] 21. **Seed ingredients 3/4.** ~40 spices, oils, condiments and aromatics with realistic small-unit prices.
 - [x] 22. **Seed ingredients 4/4.** ~30 proteins, eggs, nuts and packaged items; add a seed test for unique ids and sane values.
-- [ ] 23. **Seed recipes 1/13.** Five budget breakfasts (poha, upma, besan chilla, masala oats, veg sandwich) with structured ingredients and steps.
+- [x] 23. **Seed recipes 1/13.** Five budget breakfasts (poha, upma, besan chilla, masala oats, veg sandwich) with structured ingredients and steps.
 - [ ] 24. **Seed recipes 2/13.** Five breakfasts (aloo paratha, idli-sambar, egg bhurji toast, rava dosa, thepla).
 - [ ] 25. **Seed recipes 3/13.** Five veg lunch/dinner dishes (dal tadka rice, rajma chawal, chole roti, mixed veg sabzi, curd rice).
 - [ ] 26. **Seed recipes 4/13.** Five veg dishes (palak paneer, aloo gobi, bhindi masala, lauki dal, veg pulao).
