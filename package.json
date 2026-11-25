@@ -19,11 +19,15 @@
     "db:seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@libsql/client": "^0.18.0",
     "@react-three/fiber": "^9.8.2",
     "@types/three": "^0.187.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "dexie": "^4.4.7",
     "drizzle-orm": "^0.45.4",
     "framer-motion": "^14.14.0",
     "lucide-react": "^1.79.0",
