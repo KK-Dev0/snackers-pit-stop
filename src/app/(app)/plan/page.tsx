@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDaysIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -12,7 +13,10 @@ import { useProfile } from "@/client/hooks/use-profile";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { getDb } from "@/client/db/dexie";
 import { generatePlan } from "@/lib/planner";
-import type { Recipe } from "@/lib/schemas";
+import type { Ingredient, Recipe } from "@/lib/schemas";
+import { FuelGauge } from "@/components/common/fuel-gauge";
+import { recipeNutrition } from "@/lib/nutrition";
+import { recipeCost } from "@/lib/cost";
 
 const SLOTS = ["breakfast", "lunch", "snack", "dinner"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -23,6 +27,54 @@ export default function PlanPage() {
   const activePlanId = plans[0]?.id ?? null;
   const meals = usePlanMeals(activePlanId);
   const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/recipes?limit=100").then((r) => r.json()),
+      fetch("/api/ingredients").then((r) => r.json()),
+    ])
+      .then(([recipeData, ingredientData]) => {
+        setRecipes(recipeData.items ?? []);
+        setIngredients(ingredientData.items ?? []);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const ingMap = new Map(ingredients.map((i) => [i.id, i]));
+
+  const mealStats = (recipeId: string, mealServings: number) => {
+    const recipe = recipes.find((r) => r.id === recipeId);
+    if (!recipe) return { kcal: 0, cost: 0 };
+    const items = (recipe.ingredients ?? []).map((ri: any) => ({
+      ingredient: ri.ingredientId ? ingMap.get(ri.ingredientId) ?? null : null,
+      quantity: ri.quantity,
+      unit: ri.unit,
+    }));
+    const nut = recipeNutrition(items, recipe.servings);
+    const cost = recipeCost(items, recipe.servings);
+    return {
+      kcal: Math.round(nut.kcal * mealServings),
+      cost: Math.round(cost.perServing * mealServings * 100) / 100,
+    };
+  };
+
+  const dayStats = (dayIndex: number) => {
+    const dayMeals = meals.filter((m) => m.dayIndex === dayIndex);
+    return dayMeals.reduce(
+      (acc, m) => {
+        const s = mealStats(m.recipeId, m.servings);
+        return { kcal: acc.kcal + s.kcal, cost: acc.cost + s.cost };
+      },
+      { kcal: 0, cost: 0 },
+    );
+  };
+
+  const weeklyCost = meals.reduce((acc, m) => {
+    const s = mealStats(m.recipeId, m.servings);
+    return acc + s.cost;
+  }, 0);
 
   const generate = async () => {
     if (!profile) return;
@@ -72,6 +124,21 @@ export default function PlanPage() {
         </Button>
       </div>
 
+      {profile && meals.length > 0 && (
+        <div className="rounded-lg border bg-card p-4">
+          <h2 className="font-semibold">Weekly budget</h2>
+          <FuelGauge
+            value={weeklyCost}
+            max={profile.weeklyBudgetInr}
+            label="Weekly budget used"
+            className="mx-auto max-w-xs"
+          />
+          <p className="text-center text-sm text-muted-foreground">
+            ₹{weeklyCost.toFixed(0)} of ₹{profile.weeklyBudgetInr} · {profile.calorieGoal} kcal/day goal
+          </p>
+        </div>
+      )}
+
       {meals.length === 0 ? (
         <EmptyState
           icon={CalendarDaysIcon}
@@ -83,6 +150,9 @@ export default function PlanPage() {
           {DAYS.map((day, dayIndex) => (
             <div key={day} className="rounded-lg border bg-card p-3">
               <h2 className="font-semibold">{day}</h2>
+              <p className="text-xs text-muted-foreground">
+                {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
+              </p>
               <div className="mt-2 space-y-2">
                 {SLOTS.map((slot) => {
                   const meal = meals.find(

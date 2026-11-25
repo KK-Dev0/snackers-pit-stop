@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { RecipeListQuerySchema } from "@/lib/schemas";
-import { listRecipes } from "@/server/db/queries/recipes";
+import { listRecipesWithIngredients } from "@/server/db/queries/recipes";
 import { getDb } from "@/server/db/client";
 
 export const runtime = "nodejs";
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const q = parsed.data;
 
   const db = getDb();
-  let items = await listRecipes(db);
+  let items = await listRecipesWithIngredients(db);
 
   // filter by diet
   if (q.diet) {
