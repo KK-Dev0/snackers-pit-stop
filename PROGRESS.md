@@ -48,7 +48,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 28. **Seed recipes 6/13.** Five eggetarian dishes (egg curry, egg fried rice, egg roast, omelette wrap, egg chaat).
 - [x] 29. **Seed recipes 7/13.** Five non-veg dishes (chicken curry, chicken keema, fish curry, chicken stew, chilli chicken).
 - [x] 30. **Seed recipes 8/13.** Five non-veg dishes (chicken biryani, butter chicken, fish fry, chicken salad, keema pav).
-- [ ] 31. **Seed recipes 9/13.** Five vegan dishes (chana masala, tofu bhurji, vegetable khichdi, peanut chutney rice, dal palak).
+- [x] 31. **Seed recipes 9/13.** Five vegan dishes (chana masala, tofu bhurji, vegetable khichdi, peanut chutney rice, dal palak).
 - [ ] 32. **Seed recipes 10/13.** Five vegan dishes (sambar rice, lemon rice, coconut vegetable curry, chole palak, roasted veg wrap).
 - [ ] 33. **Seed recipes 11/13.** Five one-pot/rice dishes (veg biryani, jeera rice dal, masala khichdi, tomato bath, curd rice bowl).
 - [ ] 34. **Seed recipes 12/13.** Five snacks (onion pakora, dhokla, bhel, grilled sandwich, fruit chaat).
