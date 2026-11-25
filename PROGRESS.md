@@ -56,7 +56,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 36. **Seed stores + pincodes.** Blinkit, Zepto, Instamart, Apna Mart and local kirana, plus Asansol pincode rows marked unverified.
 - [x] 37. **Define shared Zod schemas.** Profile, ingredient, recipe, recipe draft, plan, shopping list, store and API schemas with inferred types.
 - [x] 38. **Build server repositories.** Recipe list/detail/filter, ingredient lookup, store-by-pincode, and confirmation queries.
-- [ ] 39. **Implement nutrition math.** Per-100 g/ml → serving calories/macros with rounding and estimate flags; unit tests.
+- [x] 39. **Implement nutrition math.** Per-100 g/ml → serving calories/macros with rounding and estimate flags; unit tests.
 - [ ] 40. **Implement unit conversion.** g/kg, ml/l, tsp/tbsp/cup, piece↔grams; reject incompatible families; unit tests.
 - [ ] 41. **Implement cost math.** Ingredient price × normalized quantity, per recipe and per serving; unit tests.
 - [ ] 42. **Build retrieval filters.** Hard filter by diet, allergens and dislikes in SQL behind a typed `RecipeRetriever` interface.
