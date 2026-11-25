@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 36 of 112 complete · **Current:** M2 in progress — next is task 37.
+**Status:** 47 of 112 complete · **Current:** M2 complete — next is task 48.
 
 ## How to use
 
@@ -64,7 +64,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 44. **Add embeddings flag.** `EmbeddingRanker` behind `EMBEDDINGS_ENABLED=false`; no network calls while disabled.
 - [x] 45. **Test retrieval.** Filtering correctness, allergen exclusion, pantry-first ordering, and empty-query behavior.
 - [x] 46. **Add recipe endpoints.** `GET /api/recipes` and `GET /api/recipes/[slug]` with validated params and cache headers.
-- [ ] 47. **Gate M2.** Migrate, seed, run lint/typecheck/tests, verify FTS results; commit `feat: data model, seed catalog, and retrieval`.
+- [x] 47. **Gate M2.** Migrate, seed, run lint/typecheck/tests, verify FTS results; commit `feat: data model, seed catalog, and retrieval`.
 
 ### M3 — Onboarding and planner
 - [ ] 48. **Set up Dexie.** Versioned IndexedDB schema for profile, pantry, plans, meals, imports, price overrides, list state, stores and settings.
