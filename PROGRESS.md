@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 12 of 112 complete · **Current:** M1 in progress — next is task 12.
+**Status:** 13 of 112 complete · **Current:** M1 complete — next is task 13 (M2).
 
 ## How to use
 
@@ -27,7 +27,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 9. **Build landing sections.** Three-step "how it works", feature cards, and the "free, private, no signup" band.
 - [x] 10. **Finish the landing page.** Footer, final CTA, scroll reveals, responsive polish, and accessible landmarks/headings.
 - [x] 11. **Audit landing quality.** Keyboard pass, contrast check, font/image weight, and fix what the audit finds.
-- [ ] 12. **Gate M1.** Run lint, typecheck, and build; smoke-check mobile and desktop; commit `feat: scaffold, design system, and landing page`.
+- [x] 12. **Gate M1.** Run lint, typecheck, and build; smoke-check mobile and desktop; commit `feat: scaffold, design system, and landing page`.
 
 ### M2 — Data model, seed data, retrieval
 - [ ] 13. **Add env handling.** Zod-validated `src/lib/env.ts`, `.env.example`, and clear errors for missing server vars.

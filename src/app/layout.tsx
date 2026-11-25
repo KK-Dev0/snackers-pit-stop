@@ -42,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${dmSans.variable} ${fraunces.variable}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>
