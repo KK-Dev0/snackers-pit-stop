@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react";
 
 import { deletePantryItem, savePantryItem } from "@/client/db/repos/pantry";
 import { usePantry } from "@/client/hooks/use-pantry";
@@ -25,7 +25,14 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { normalizeIngredientName } from "@/lib/ingredient-match";
-import { PantryItemSchema, UnitSchema, type PantryItem, type Unit } from "@/lib/schemas";
+import {
+  IngredientListSchema,
+  PantryItemSchema,
+  UnitSchema,
+  type Ingredient,
+  type PantryItem,
+  type Unit,
+} from "@/lib/schemas";
 
 type FormState = {
   id?: string;
@@ -43,11 +50,47 @@ const EMPTY_FORM: FormState = {
   isStaple: false,
 };
 
-/** Add, edit and delete the items on the device pantry. */
+type SortOption = "name" | "recent" | "staples";
+
+function pantryItemFromIngredient(ingredient: Ingredient) {
+  const now = Date.now();
+  return PantryItemSchema.safeParse({
+    id: crypto.randomUUID(),
+    ingredientId: ingredient.id,
+    name: ingredient.name,
+    normalizedName: normalizeIngredientName(ingredient.name),
+    quantity: 1,
+    unit: ingredient.baseUnit,
+    isStaple: ingredient.isStaple,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
+/** Add, edit, find and delete the items on the device pantry. */
 export function PantryManager() {
   const items = usePantry();
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortOption>("recent");
   const [form, setForm] = useState<FormState | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void fetch("/api/ingredients")
+      .then((response) => response.json())
+      .then((json: unknown) => {
+        const parsed = IngredientListSchema.safeParse(
+          json && typeof json === "object" && "items" in json ? json.items : json,
+        );
+        if (active && parsed.success) setIngredients(parsed.data);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const close = () => {
     setForm(null);
@@ -96,6 +139,45 @@ export function PantryManager() {
     await deletePantryItem(item.id);
   };
 
+  const quickAdd = async (ingredient: Ingredient) => {
+    const parsed = pantryItemFromIngredient(ingredient);
+    if (parsed.success) await savePantryItem(parsed.data);
+  };
+
+  const needle = normalizeIngredientName(query);
+  const visibleItems = useMemo(() => {
+    const filtered = needle
+      ? items.filter((item) => normalizeIngredientName(item.name).includes(needle))
+      : [...items];
+    if (sort === "name") {
+      return filtered.sort((a, b) => a.name.localeCompare(b.name));
+    }
+    if (sort === "staples") {
+      return filtered.sort(
+        (a, b) => Number(b.isStaple) - Number(a.isStaple) || a.name.localeCompare(b.name),
+      );
+    }
+    return filtered.sort((a, b) => b.createdAt - a.createdAt);
+  }, [items, needle, sort]);
+
+  const suggestions = useMemo(() => {
+    const owned = new Set(
+      items.flatMap((item) => [
+        item.ingredientId ?? "",
+        normalizeIngredientName(item.name),
+      ]),
+    );
+    return ingredients
+      .filter(
+        (ingredient) =>
+          !owned.has(ingredient.id) &&
+          !owned.has(normalizeIngredientName(ingredient.name)) &&
+          (!needle || normalizeIngredientName(ingredient.name).includes(needle)),
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(0, 8);
+  }, [ingredients, items, needle]);
+
   return (
     <section aria-labelledby="pantry-items-heading" className="space-y-3">
       <div className="flex items-center justify-between gap-3">
@@ -112,6 +194,60 @@ export function PantryManager() {
         </Button>
       </div>
 
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+        <div className="relative">
+          <SearchIcon
+            className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            value={query}
+            placeholder="Search your pantry"
+            aria-label="Search pantry items"
+            className="pl-9"
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </div>
+        <div className="sm:w-36">
+          <Label htmlFor="pantry-sort" className="sr-only">
+            Sort pantry items
+          </Label>
+          <Select value={sort} onValueChange={(value) => setSort(value as SortOption)}>
+            <SelectTrigger id="pantry-sort">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Recently added</SelectItem>
+              <SelectItem value="name">Name A–Z</SelectItem>
+              <SelectItem value="staples">Staples first</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {suggestions.length > 0 ? (
+        <div className="rounded-2xl border border-dashed bg-card/60 p-3">
+          <p className="mb-2 text-sm font-medium">
+            {needle ? "Matching ingredients" : "Quick add from the catalog"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((ingredient) => (
+              <Button
+                key={ingredient.id}
+                type="button"
+                variant="outline"
+                size="sm"
+                aria-label={`Add ${ingredient.name} to pantry`}
+                onClick={() => void quickAdd(ingredient)}
+              >
+                <PlusIcon aria-hidden="true" /> {ingredient.name}
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {items.length === 0 ? (
         <EmptyState
           icon={PlusIcon}
@@ -123,9 +259,15 @@ export function PantryManager() {
             </Button>
           }
         />
+      ) : visibleItems.length === 0 ? (
+        <EmptyState
+          icon={SearchIcon}
+          title="No matching items"
+          description="Try a different search term, or add the item manually."
+        />
       ) : (
         <ul className="divide-y rounded-2xl border bg-card">
-          {items.map((item) => (
+          {visibleItems.map((item) => (
             <li key={item.id} className="flex items-center gap-3 px-4 py-3">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{item.name}</p>
