@@ -33,12 +33,13 @@ export function StorePicker({
   onChange,
   onCustomNameChange,
 }: StorePickerProps) {
-  const { records, setSelected, setCustomName } = useUserStores();
+  const { records, setSelected, setCustomName, markConfirmed } = useUserStores();
   const ordered = orderStores(stores, records, selectedIds);
   const savedCustomName =
     records.find((record) => record.storeId === LOCAL_KIRANA_ID)?.customName ?? "";
   // `null` means "no local edit yet"; an empty string is a deliberate clearing.
   const [draftCustomName, setLocalCustomName] = useState<string | null>(null);
+  const [voteMessage, setVoteMessage] = useState("");
   const customName = draftCustomName ?? savedCustomName;
 
   const nextIds = (storeId: string, selected: boolean) =>
@@ -46,9 +47,34 @@ export function StorePicker({
       ? Array.from(new Set([...selectedIds, storeId]))
       : selectedIds.filter((id) => id !== storeId);
 
+  // Choosing a store is also an anonymous crowdsourced vote. The API hashes
+  // the IP and dedupes repeat votes; local state only records the outcome.
+  const vote = async (storeId: string) => {
+    try {
+      const response = await fetch("/api/stores/confirm", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ pincode, storeId }),
+      });
+      if (response.ok || response.status === 409) {
+        await markConfirmed(storeId);
+        setVoteMessage(
+          response.ok
+            ? "Thanks — availability confirmed."
+            : "You already confirmed this store here.",
+        );
+      } else {
+        setVoteMessage("Could not confirm availability right now.");
+      }
+    } catch {
+      setVoteMessage("Could not confirm availability right now.");
+    }
+  };
+
   const handleToggle = (storeId: string, selected: boolean) => {
     void setSelected(storeId, selected);
     onChange?.(nextIds(storeId, selected), customName || undefined);
+    if (selected) void vote(storeId);
   };
 
   const handleCustomName = (name: string) => {
@@ -96,6 +122,10 @@ export function StorePicker({
           </li>
         ))}
       </ul>
+
+      <p aria-live="polite" className="text-xs text-muted-foreground">
+        {voteMessage}
+      </p>
 
       {ordered.some((store) => store.id === LOCAL_KIRANA_ID && store.selected) && (
         <div className="space-y-1">

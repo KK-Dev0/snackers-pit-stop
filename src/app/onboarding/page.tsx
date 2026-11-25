@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 // no radio-group component; use buttons instead
 import { Input } from "@/components/ui/input";
-import { saveProfile } from "@/client/db/repos/profile";
+import { getProfile, saveProfile } from "@/client/db/repos/profile";
 import { useStores } from "@/client/hooks/use-stores";
 import { PincodeField } from "@/components/stores/pincode-field";
 import { StorePicker } from "@/components/stores/store-picker";
@@ -32,6 +32,26 @@ export default function OnboardingPage() {
   const [storeIds, setStoreIds] = useState<string[]>([]);
   const [customStoreName, setCustomStoreName] = useState<string>("");
   const { items: stores, hasAvailabilityData, loading } = useStores(pincode);
+
+  // Editing an existing profile must preserve the pincode and store picks.
+  const hydrated = useRef(false);
+  useEffect(() => {
+    void getProfile()
+      .then((saved) => {
+        if (!saved || hydrated.current) return;
+        hydrated.current = true;
+        setDiet(saved.diet ?? "veg");
+        setServings(saved.servings ?? 2);
+        setCalorieGoal(saved.calorieGoal ?? 2000);
+        setWeeklyBudget(saved.weeklyBudgetInr ?? 2000);
+        setAllergens(saved.allergens ?? []);
+        setDislikes((saved.dislikes ?? []).join(", "));
+        setPincode(saved.pincode ?? "");
+        setStoreIds(saved.storeIds ?? []);
+        setCustomStoreName(saved.customStoreName ?? "");
+      })
+      .catch(() => undefined);
+  }, []);
 
   const skip = () => router.push("/plan");
 

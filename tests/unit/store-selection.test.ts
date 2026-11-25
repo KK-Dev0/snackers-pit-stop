@@ -5,6 +5,7 @@ import {
   isStoreSelected,
   orderStores,
   resolveHandoffStores,
+  selectedStoresForHandoff,
   type StoreChoice,
 } from "@/lib/store-selection";
 import type { StoreWithAvailability } from "@/lib/schemas";
@@ -68,5 +69,32 @@ describe("store selection", () => {
         (item) => item.id,
       ),
     ).toEqual(["local-kirana"]);
+  });
+
+  it("builds a handoff catalog from profile picks and profile custom name", () => {
+    const handoff = selectedStoresForHandoff(
+      catalog,
+      [],
+      ["local-kirana"],
+      "Ravi's store",
+    );
+    expect(handoff).toHaveLength(1);
+    expect(handoff[0]).toMatchObject({
+      id: "local-kirana",
+      name: "Ravi's store",
+      linkTemplate: null,
+    });
+    expect(handoff[0]).not.toHaveProperty("selected");
+    expect(handoff[0]).not.toHaveProperty("displayName");
+  });
+
+  it("lets a device rename override the profile custom name", () => {
+    const handoff = selectedStoresForHandoff(
+      catalog,
+      [{ storeId: "local-kirana", selected: true, customName: "Corner shop" }],
+      ["local-kirana"],
+      "Ravi's store",
+    );
+    expect(handoff.map((item) => item.name)).toEqual(["Corner shop"]);
   });
 });

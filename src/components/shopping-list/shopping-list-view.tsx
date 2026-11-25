@@ -12,6 +12,8 @@ import {
 } from "@/client/db/repos/shoppingListState";
 import { usePantry } from "@/client/hooks/use-pantry";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
+import { useProfile } from "@/client/hooks/use-profile";
+import { useUserStores } from "@/client/hooks/use-user-stores";
 import { AisleSections } from "@/components/shopping-list/aisle-sections";
 import { ShoppingListItem } from "@/components/shopping-list/shopping-list-item";
 import { StoreHandoff } from "@/components/shopping-list/store-handoff";
@@ -28,18 +30,19 @@ import {
 } from "@/lib/shopping-list";
 import { formatShoppingListText, shareText } from "@/lib/sharing";
 import { listSearchQuery } from "@/lib/store-links";
+import { selectedStoresForHandoff } from "@/lib/store-selection";
 import {
   IngredientListSchema,
   RecipeSchema,
   ShoppingItemSchema,
+  StoresResponseSchema,
   type Ingredient,
   type PantryItem,
   type PlanMeal,
   type Recipe,
   type ShoppingItem,
   type ShoppingList,
-  StoreSchema,
-  type Store,
+  type StoreWithAvailability,
 } from "@/lib/schemas";
 import { formatWeekLabel, weekStartForDate } from "@/lib/weeks";
 
@@ -96,11 +99,14 @@ export function ShoppingListView() {
   const planId = activePlan?.id ?? null;
   const meals = usePlanMeals(planId);
   const pantry = usePantry();
+  const profile = useProfile();
+  const { records: userStoreRecords } = useUserStores();
+  const pincode = profile?.pincode ?? null;
 
   const [catalog, setCatalog] = useState<Recipe[]>([]);
   const [localRecipes, setLocalRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [stores, setStores] = useState<Store[]>([]);
+  const [stores, setStores] = useState<StoreWithAvailability[]>([]);
   const [listState, setListState] = useState<ShoppingListStateRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -109,10 +115,13 @@ export function ShoppingListView() {
 
   useEffect(() => {
     let active = true;
+    const storeUrl = pincode
+      ? `/api/stores?pincode=${encodeURIComponent(pincode)}`
+      : "/api/stores";
     void Promise.all([
       fetch("/api/recipes?limit=100").then((response) => response.json()),
       fetch("/api/ingredients").then((response) => response.json()),
-      fetch("/api/stores").then((response) => response.json()),
+      fetch(storeUrl).then((response) => response.json()),
     ])
       .then(([recipeJson, ingredientJson, storeJson]) => {
         const recipeData = RecipeSchema.array().safeParse(
@@ -121,14 +130,14 @@ export function ShoppingListView() {
         const ingredientData = IngredientListSchema.safeParse(
           (ingredientJson as JsonShape).items ?? [],
         );
-        const storeData = StoreSchema.array().safeParse((storeJson as JsonShape).items ?? []);
+        const storeData = StoresResponseSchema.safeParse(storeJson);
         if (!active) return;
         if (!recipeData.success || !ingredientData.success || !storeData.success) {
           throw new Error("Bad response");
         }
         setCatalog(recipeData.data);
         setIngredients(ingredientData.data);
-        setStores(storeData.data);
+        setStores(storeData.data.items);
         setError(false);
       })
       .catch(() => active && setError(true))
@@ -136,7 +145,7 @@ export function ShoppingListView() {
     return () => {
       active = false;
     };
-  }, [retryCount]);
+  }, [retryCount, pincode]);
 
   useEffect(() => {
     let active = true;
@@ -170,6 +179,18 @@ export function ShoppingListView() {
   }, [planId]);
 
   const includeStaples = listState?.includeStaples ?? false;
+
+  // Device choices beat the profile; with no chooser every store is offered.
+  const handoffStores = useMemo(
+    () =>
+      selectedStoresForHandoff(
+        stores,
+        userStoreRecords,
+        profile?.storeIds ?? [],
+        profile?.customStoreName,
+      ),
+    [stores, userStoreRecords, profile?.storeIds, profile?.customStoreName],
+  );
 
   const recipeMap = useMemo(() => {
     const map = new Map<string, Recipe>();
@@ -288,7 +309,7 @@ export function ShoppingListView() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <StoreHandoff
-                  stores={stores}
+                  stores={handoffStores}
                   query={listSearchQuery(items, listState?.itemOrder)}
                   items={items}
                   savedOrder={listState?.itemOrder}
@@ -354,7 +375,7 @@ export function ShoppingListView() {
                     <ShoppingListItem item={item} onToggle={toggleChecked} />
                   </div>
                   <StoreHandoff
-                    stores={stores}
+                    stores={handoffStores}
                     query={item.name}
                     items={[item]}
                     savedOrder={[]}

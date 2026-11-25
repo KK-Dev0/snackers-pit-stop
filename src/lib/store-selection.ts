@@ -64,3 +64,35 @@ export function resolveHandoffStores(
   const selected = ordered.filter((store) => store.selected);
   return selected.length > 0 ? selected : ordered;
 }
+
+/**
+ * Final handoff catalog: device choices win over the profile, and the profile
+ * custom kirana name wins over the seeded placeholder. Derived selection
+ * fields are stripped so the result can be passed to `StoreHandoff`.
+ */
+export function selectedStoresForHandoff(
+  stores: StoreWithAvailability[],
+  choices: StoreChoice[] = [],
+  profileStoreIds: string[] = [],
+  customStoreName?: string,
+): StoreWithAvailability[] {
+  return resolveHandoffStores(stores, choices, profileStoreIds).map((store) => {
+    const profileName = customStoreName?.trim();
+    const name =
+      store.id === "local-kirana" &&
+      profileName &&
+      store.displayName === store.name
+        ? profileName
+        : store.displayName;
+    return {
+      id: store.id,
+      name,
+      type: store.type,
+      linkTemplate: store.linkTemplate,
+      sortOrder: store.sortOrder,
+      confirmedCount: store.confirmedCount,
+      confirmed: store.confirmed,
+      lastConfirmedAt: store.lastConfirmedAt,
+    };
+  });
+}
