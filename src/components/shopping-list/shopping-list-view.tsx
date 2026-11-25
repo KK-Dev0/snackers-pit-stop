@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ClipboardListIcon, RefreshCwIcon } from "lucide-react";
+import { ClipboardListIcon, RefreshCwIcon, Share2Icon } from "lucide-react";
 
 import type { ShoppingListStateRecord } from "@/client/db/dexie";
 import { listSavedRecipes } from "@/client/db/repos/savedRecipes";
@@ -25,6 +25,7 @@ import {
   generateShoppingList,
   subtractPantryFromList,
 } from "@/lib/shopping-list";
+import { formatShoppingListText, shareText } from "@/lib/sharing";
 import {
   IngredientListSchema,
   RecipeSchema,
@@ -99,6 +100,7 @@ export function ShoppingListView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [shareMessage, setShareMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -191,6 +193,21 @@ export function ShoppingListView() {
   const totalCost = items.reduce((sum, item) => sum + (item.estimatedCostInr ?? 0), 0);
   const checkedCount = items.filter((item) => item.checked).length;
 
+  const share = async () => {
+    const result = await shareText(
+      formatShoppingListText(items, `Shopping list · ${formatWeekLabel(activePlan.weekStart)}`, listState?.itemOrder),
+    );
+    setShareMessage(
+      result === "shared"
+        ? "List shared."
+        : result === "copied"
+          ? "List copied — paste it into WhatsApp."
+          : result === "cancelled"
+            ? "Sharing cancelled."
+            : "Could not copy the list. Please try again.",
+    );
+  };
+
   const toggleChecked = (key: string) => {
     const next = new Set(listState?.checkedKeys ?? []);
     if (next.has(key)) next.delete(key);
@@ -260,6 +277,15 @@ export function ShoppingListView() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={items.length === 0}
+                  onClick={() => void share()}
+                >
+                  <Share2Icon aria-hidden="true" /> Copy / share
+                </Button>
                 {checkedCount > 0 ? (
                   <Button
                     type="button"
@@ -284,6 +310,9 @@ export function ShoppingListView() {
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
               Prices and nutrition are rough estimates. Check labels for allergens.
+            </p>
+            <p aria-live="polite" className="mt-1 text-xs text-muted-foreground">
+              {shareMessage}
             </p>
           </section>
 
