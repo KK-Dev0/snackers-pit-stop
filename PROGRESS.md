@@ -54,7 +54,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 34. **Seed recipes 12/13.** Five snacks (onion pakora, dhokla, bhel, grilled sandwich, fruit chaat).
 - [x] 35. **Seed recipes 13/13.** Five regional/high-protein dishes (litti chokha, cholar dal, soya chunk curry, sprout salad, paneer tikka bowl); add a recipe integrity test.
 - [x] 36. **Seed stores + pincodes.** Blinkit, Zepto, Instamart, Apna Mart and local kirana, plus Asansol pincode rows marked unverified.
-- [ ] 37. **Define shared Zod schemas.** Profile, ingredient, recipe, recipe draft, plan, shopping list, store and API schemas with inferred types.
+- [x] 37. **Define shared Zod schemas.** Profile, ingredient, recipe, recipe draft, plan, shopping list, store and API schemas with inferred types.
 - [ ] 38. **Build server repositories.** Recipe list/detail/filter, ingredient lookup, store-by-pincode, and confirmation queries.
 - [ ] 39. **Implement nutrition math.** Per-100 g/ml → serving calories/macros with rounding and estimate flags; unit tests.
 - [ ] 40. **Implement unit conversion.** g/kg, ml/l, tsp/tbsp/cup, piece↔grams; reject incompatible families; unit tests.
