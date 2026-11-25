@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { RecommendRequestSchema } from "@/lib/schemas";
 import { getDb } from "@/server/db/client";
 import { createRecipeRetriever } from "@/server/retrieval";
-import { getClientIp, hashIp, rateLimit } from "@/server/rate-limit";
+import { rateLimitRequest } from "@/server/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -23,11 +23,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const ip = getClientIp(request);
-  const ipHash = hashIp(ip);
-  const rl = rateLimit(`recommend:${ipHash}`, 60, 60_000);
+  const rl = rateLimitRequest(request, "recommend");
   if (!rl.allowed) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
   }
 
   const retriever = createRecipeRetriever(getDb());
