@@ -45,11 +45,19 @@ export const ConfirmStoreRequestSchema = z.object({
 
 export const ImportUrlRequestSchema = z.object({
   url: z
-    .url()
+    .url({ message: "Enter a valid http(s) URL." })
     .max(2_048)
-    .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
-      message: "Only http(s) URLs are supported.",
-    }),
+    // Zod 4 runs refinements even when .url() fails, so guard the URL parse.
+    .refine(
+      (value) => {
+        try {
+          return ["http:", "https:"].includes(new URL(value).protocol);
+        } catch {
+          return false;
+        }
+      },
+      { message: "Only http(s) URLs are supported." },
+    ),
 });
 
 export type RecipeListQuery = z.infer<typeof RecipeListQuerySchema>;
