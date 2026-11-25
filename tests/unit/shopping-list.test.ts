@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   canonicalizeIngredient,
   generateShoppingList,
+  groupByAisle,
   ingredientKey,
   mergeIngredients,
+  moveShoppingItem,
   resolveIngredient,
   subtractPantry,
 } from "@/lib/shopping-list";
@@ -316,5 +318,40 @@ describe("pantry subtraction", () => {
       pantry: [pantryItem({ id: "p1", name: "Mystery leaves", quantity: 1, unit: "piece" })],
     });
     expect(result[0]).toMatchObject({ quantity: 1 });
+  });
+});
+
+describe("aisle grouping and manual order", () => {
+  const items = [
+    shoppingItem({ key: "spice", name: "Cumin", quantity: 1, unit: "g", aisle: "spices" }),
+    shoppingItem({ key: "veg", name: "Onion", quantity: 1, unit: "g", aisle: "produce" }),
+    shoppingItem({ key: "dal", name: "Dal", quantity: 1, unit: "g", aisle: "staples" }),
+    shoppingItem({ key: "milk", name: "Milk", quantity: 1, unit: "ml", aisle: "dairy" }),
+  ];
+
+  it("groups in a stable aisle order and skips empty aisles", () => {
+    expect(groupByAisle(items).map((group) => group.aisle)).toEqual([
+      "produce",
+      "dairy",
+      "staples",
+      "spices",
+    ]);
+    expect(groupByAisle([])).toEqual([]);
+  });
+
+  it("applies a saved manual order within the aisle sequence", () => {
+    const groups = groupByAisle(items, ["dal", "spice", "milk", "veg"]);
+    expect(groups[2].items[0].key).toBe("dal");
+    expect(groups[3].items[0].key).toBe("spice");
+  });
+
+  it("moves lines within an aisle but never across aisles", () => {
+    const sameAisle = [
+      shoppingItem({ key: "a", name: "A", quantity: 1, unit: "g", aisle: "produce" }),
+      shoppingItem({ key: "b", name: "B", quantity: 1, unit: "g", aisle: "produce" }),
+    ];
+    expect(moveShoppingItem(sameAisle, "a", 1).map((item) => item.key)).toEqual(["b", "a"]);
+    expect(moveShoppingItem(sameAisle, "a", -1)).toEqual(sameAisle);
+    expect(moveShoppingItem(items, "veg", 1)).toEqual(items);
   });
 });

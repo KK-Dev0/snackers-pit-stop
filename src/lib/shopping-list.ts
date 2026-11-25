@@ -273,3 +273,73 @@ export function subtractPantryFromList(
 ): ShoppingList {
   return { ...list, items: subtractPantry(list.items, options) };
 }
+
+/** The order aisles appear in, from fresh food through to pantry staples. */
+export const AISLE_ORDER: Aisle[] = [
+  "produce",
+  "dairy",
+  "protein",
+  "bakery",
+  "staples",
+  "spices",
+  "other",
+];
+
+export const AISLE_LABELS: Record<Aisle, string> = {
+  produce: "Fruit & vegetables",
+  dairy: "Dairy & eggs",
+  protein: "Protein",
+  bakery: "Bakery",
+  staples: "Grains & staples",
+  spices: "Spices & condiments",
+  other: "Everything else",
+};
+
+export type AisleGroup = {
+  aisle: Aisle;
+  label: string;
+  items: ShoppingItem[];
+};
+
+/** Apply a saved manual order, then group into a predictable aisle sequence. */
+export function groupByAisle(items: ShoppingItem[], savedOrder: string[] = []): AisleGroup[] {
+  const rank = new Map(savedOrder.map((key, index) => [key, index]));
+  const ordered = items
+    .map((item, index) => ({ item, index }))
+    .sort((a, b) => {
+      const ar = rank.get(a.item.key);
+      const br = rank.get(b.item.key);
+      if (ar !== undefined && br !== undefined && ar !== br) return ar - br;
+      if (ar !== undefined && br === undefined) return -1;
+      if (ar === undefined && br !== undefined) return 1;
+      return a.index - b.index;
+    })
+    .map(({ item }) => item);
+
+  return AISLE_ORDER.flatMap((aisle) => {
+    const group = ordered.filter((item) => item.aisle === aisle);
+    return group.length > 0 ? [{ aisle, label: AISLE_LABELS[aisle], items: group }] : [];
+  });
+}
+
+/** Move one line past its neighbour inside the same aisle; never across aisles. */
+export function moveShoppingItem(
+  items: ShoppingItem[],
+  key: string,
+  direction: -1 | 1,
+): ShoppingItem[] {
+  const index = items.findIndex((item) => item.key === key);
+  if (index < 0) return items;
+  const source = items[index];
+  const targetIndex = index + direction;
+  if (
+    targetIndex < 0 ||
+    targetIndex >= items.length ||
+    items[targetIndex].aisle !== source.aisle
+  ) {
+    return items;
+  }
+  const next = [...items];
+  [next[index], next[targetIndex]] = [next[targetIndex], next[index]];
+  return next;
+}
