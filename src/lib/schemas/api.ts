@@ -42,8 +42,18 @@ export const ConfirmStoreRequestSchema = z.object({
   storeId: z.string().min(1),
 });
 
+export const ImportUrlRequestSchema = z.object({
+  url: z
+    .url()
+    .max(2_048)
+    .refine((value) => ["http:", "https:"].includes(new URL(value).protocol), {
+      message: "Only http(s) URLs are supported.",
+    }),
+});
+
 export type RecipeListQuery = z.infer<typeof RecipeListQuerySchema>;
 export type RecommendRequest = z.infer<typeof RecommendRequestSchema>;
 export type GeoReverseRequest = z.infer<typeof GeoReverseRequestSchema>;
 export type StoresQuery = z.infer<typeof StoresQuerySchema>;
 export type ConfirmStoreRequest = z.infer<typeof ConfirmStoreRequestSchema>;
+export type ImportUrlRequest = z.infer<typeof ImportUrlRequestSchema>;

@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 52 of 112 complete · **Current:** M4 in progress — next is task 72.
+**Status:** 53 of 112 complete · **Current:** M4 in progress — next is task 73.
 
 ## How to use
 
@@ -93,7 +93,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 69. **Add IP rate limiting.** Hashed-IP sliding window utility with per-route limits and tests; apply it to all LLM/import routes.
 - [x] 70. **Build safe URL fetching.** http/https only, private-IP blocking, 8 s timeout, 2 MB cap, content-type checks, and tests.
 - [x] 71. **Parse schema.org JSON-LD.** Extract Recipe objects, map fields/ingredients/units, and test messy real-world shapes.
-- [ ] 72. **Add the URL import route.** `POST /api/import/url` uses JSON-LD first and the LLM only as fallback, returning a validated draft.
+- [x] 72. **Add the URL import route.** `POST /api/import/url` uses JSON-LD first and the LLM only as fallback, returning a validated draft.
 - [ ] 73. **Write the extraction prompt.** Strict JSON recipe schema, no invented nutrition or prices, source attribution, and refusal rules.
 - [ ] 74. **Add photo import (optional).** `POST /api/import/photo` with image type/size validation and a vision model returning the same draft schema; gated behind `PHOTO_IMPORT_ENABLED=false` by default and hidden in the UI while disabled.
 - [ ] 75. **Build the import review form.** Editable title, servings, ingredients, units, steps, diet/allergen tags and source link.
