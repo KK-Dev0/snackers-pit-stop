@@ -59,7 +59,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 39. **Implement nutrition math.** Per-100 g/ml → serving calories/macros with rounding and estimate flags; unit tests.
 - [x] 40. **Implement unit conversion.** g/kg, ml/l, tsp/tbsp/cup, piece↔grams; reject incompatible families; unit tests.
 - [x] 41. **Implement cost math.** Ingredient price × normalized quantity, per recipe and per serving; unit tests.
-- [ ] 42. **Build retrieval filters.** Hard filter by diet, allergens and dislikes in SQL behind a typed `RecipeRetriever` interface.
+- [x] 42. **Build retrieval filters.** Hard filter by diet, allergens and dislikes in SQL behind a typed `RecipeRetriever` interface.
 - [ ] 43. **Add ranking.** FTS5 bm25 + pantry-overlap score + variety signal, returning a score breakdown and reasons.
 - [ ] 44. **Add embeddings flag.** `EmbeddingRanker` behind `EMBEDDINGS_ENABLED=false`; no network calls while disabled.
 - [ ] 45. **Test retrieval.** Filtering correctness, allergen exclusion, pantry-first ordering, and empty-query behavior.
