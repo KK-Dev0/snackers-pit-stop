@@ -359,16 +359,16 @@ export function ImportReviewForm({
 
       <div className="space-y-3">
         <h3 className="text-sm font-medium">Ingredients</h3>
-        {state.ingredients.map((row) => (
+        {state.ingredients.map((row, index) => (
           <div key={row.key} className="grid grid-cols-[1fr_5rem_6rem_auto_auto] gap-2">
             <Input
-              aria-label="Ingredient name"
+              aria-label={`Ingredient ${index + 1} name`}
               placeholder="Ingredient"
               value={row.rawName}
               onChange={(event) => updateIngredient(row.key, { rawName: event.target.value })}
             />
             <Input
-              aria-label="Quantity"
+              aria-label={`Ingredient ${index + 1} quantity`}
               type="number"
               min={0}
               step="any"
@@ -379,7 +379,7 @@ export function ImportReviewForm({
               value={row.unit}
               onValueChange={(value) => updateIngredient(row.key, { unit: value as Unit })}
             >
-              <SelectTrigger aria-label="Unit" className="w-full">
+              <SelectTrigger aria-label={`Ingredient ${index + 1} unit`} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -396,7 +396,7 @@ export function ImportReviewForm({
                 onCheckedChange={(checked) =>
                   updateIngredient(row.key, { optional: checked === true })
                 }
-                aria-label={`${row.rawName || "Ingredient"} is optional`}
+                aria-label={`Ingredient ${index + 1}${row.rawName ? ` (${row.rawName})` : ""} is optional`}
               />
               Optional
             </label>
@@ -404,7 +404,7 @@ export function ImportReviewForm({
               type="button"
               variant="ghost"
               size="icon"
-              aria-label={`Remove ${row.rawName || "ingredient"}`}
+              aria-label={`Remove ingredient ${index + 1}${row.rawName ? ` (${row.rawName})` : ""}`}
               onClick={() =>
                 update(
                   "ingredients",

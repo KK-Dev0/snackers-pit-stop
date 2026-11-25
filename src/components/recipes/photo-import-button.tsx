@@ -79,7 +79,8 @@ export function PhotoImportButton({
         type="file"
         accept={ALLOWED_IMAGE_TYPES.join(",")}
         className="sr-only"
-        aria-label="Choose a recipe photo"
+        tabIndex={-1}
+        aria-hidden="true"
         onChange={(event) => {
           const file = event.target.files?.[0];
           event.target.value = "";

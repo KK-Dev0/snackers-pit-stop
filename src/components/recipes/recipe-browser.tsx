@@ -91,7 +91,7 @@ export function RecipeBrowser() {
           <h2 id="catalog-heading" className="font-display text-xl font-semibold">
             Browse recipes
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p aria-live="polite" className="text-sm text-muted-foreground">
             {loading ? "Loading…" : `${total} ${total === 1 ? "recipe" : "recipes"} found`}
           </p>
         </div>
@@ -169,16 +169,18 @@ export function RecipeBrowser() {
       </fieldset>
 
       {error ? (
-        <EmptyState
-          icon={SearchIcon}
-          title="Could not load recipes"
-          description="The catalog is unavailable right now. Try again in a moment."
-          action={
-            <Button type="button" variant="outline" onClick={() => void load(0, false)}>
-              Retry
-            </Button>
-          }
-        />
+        <div role="alert">
+          <EmptyState
+            icon={SearchIcon}
+            title="Could not load recipes"
+            description="The catalog is unavailable right now. Try again in a moment."
+            action={
+              <Button type="button" variant="outline" onClick={() => void load(0, false)}>
+                Retry
+              </Button>
+            }
+          />
+        </div>
       ) : loading && items.length === 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }, (_, index) => (

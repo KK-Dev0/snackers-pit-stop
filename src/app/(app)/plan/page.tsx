@@ -12,7 +12,12 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  CalendarDaysIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  GripVerticalIcon,
+} from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
@@ -40,24 +45,67 @@ import { recipeCost } from "@/lib/cost";
 const SLOTS = ["breakfast", "lunch", "snack", "dinner"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function DraggableMeal({ id, children }: { id: string; children: ReactNode }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+/** The drag activator is its own button so lock/swap stay independent tab stops. */
+function DraggableMeal({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: string;
+  children: ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id,
+    data: { label },
+  });
   return (
     <div
       ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      style={{ opacity: isDragging ? 0.5 : 1, cursor: "grab", touchAction: "pan-y" }}
+      style={{ opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-start gap-1"
     >
-      {children}
+      <button
+        type="button"
+        {...listeners}
+        {...attributes}
+        aria-label={`Move ${label}`}
+        className="mt-0.5 rounded p-0.5 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <GripVerticalIcon className="size-3.5" aria-hidden="true" />
+      </button>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }
 
-function DroppableSlot({ id, children }: { id: string; children: ReactNode }) {
+function slotTargetLabel(id: string | number | undefined): string {
+  const [dayIndex, slot] = String(id ?? "").split(":");
+  const day = DAYS[Number(dayIndex)];
+  return day && slot ? `${day} ${slot}` : "another slot";
+}
+
+function draggedMealLabel(id: string | number | undefined): string {
+  return String(id ?? "") || "meal";
+}
+
+function DroppableSlot({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: string;
+  children: ReactNode;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id });
   return (
-    <div ref={setNodeRef} className={isOver ? "rounded-md ring-2 ring-primary" : undefined}>
+    <div
+      ref={setNodeRef}
+      role="group"
+      aria-label={`${label} slot`}
+      className={isOver ? "rounded-md ring-2 ring-primary" : undefined}
+    >
       {children}
     </div>
   );
@@ -78,6 +126,7 @@ export default function PlanPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; slot: string } | null>(null);
+  const [status, setStatus] = useState("");
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor),
@@ -92,7 +141,7 @@ export default function PlanPage() {
         setRecipes(recipeData.items ?? []);
         setIngredients(ingredientData.items ?? []);
       })
-      .catch(() => undefined);
+      .catch(() => setStatus("Could not load recipe details. Plan estimates may be incomplete."));
   }, []);
 
   const ingMap = new Map(ingredients.map((i) => [i.id, i]));
@@ -135,6 +184,7 @@ export default function PlanPage() {
     try {
       const weekStart = selectedWeekStart;
       const res = await fetch(`/api/recipes?limit=100&diet=${profile.diet}`);
+      if (!res.ok) throw new Error("Recipe catalog unavailable");
       const data = await res.json();
       const recipes = (data.items ?? []) as Recipe[];
       const { plan, meals: generated } = generatePlan({
@@ -150,6 +200,9 @@ export default function PlanPage() {
       await db.plans.put(plan);
       await db.planMeals.where("planId").equals(plan.id).delete();
       await db.planMeals.bulkPut(generated);
+      setStatus(`Generated a plan for the week of ${formatWeekLabel(weekStart)}.`);
+    } catch {
+      setStatus("Could not generate the plan. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -180,6 +233,9 @@ export default function PlanPage() {
       await db.plans.put(plan);
       await db.planMeals.where("planId").equals(plan.id).delete();
       await db.planMeals.bulkPut(copied);
+      setStatus(`Copied ${copied.length} meals from last week.`);
+    } catch {
+      setStatus("Could not copy last week's plan. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -192,15 +248,30 @@ export default function PlanPage() {
     );
     if (!meal) return;
     const db = getDb();
-    await db.planMeals.put({ ...meal, recipeId });
-    setSwapTarget(null);
+    try {
+      await db.planMeals.put({ ...meal, recipeId });
+      const replacement = recipes.find((recipe) => recipe.id === recipeId);
+      setStatus(
+        `Replaced ${DAYS[swapTarget.dayIndex]} ${swapTarget.slot} with ${replacement?.title ?? recipeId}.`,
+      );
+      setSwapTarget(null);
+    } catch {
+      setStatus("Could not swap that meal. Please try again.");
+    }
   };
 
   const toggleLock = async (mealId: string) => {
     const meal = meals.find((m) => m.id === mealId);
     if (!meal) return;
     const db = getDb();
-    await db.planMeals.put({ ...meal, locked: !meal.locked });
+    try {
+      await db.planMeals.put({ ...meal, locked: !meal.locked });
+      setStatus(
+        `${DAYS[meal.dayIndex]} ${meal.slot} ${meal.locked ? "unlocked" : "locked"}.`,
+      );
+    } catch {
+      setStatus("Could not update that meal's lock. Please try again.");
+    }
   };
 
   const regenerate = async () => {
@@ -230,6 +301,9 @@ export default function PlanPage() {
       const db = getDb();
       await db.planMeals.where("planId").equals(newPlan.id).delete();
       await db.planMeals.bulkPut(generated);
+      setStatus(`Regenerated ${generated.length} meals; locked meals were kept.`);
+    } catch {
+      setStatus("Could not regenerate the plan. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -248,15 +322,21 @@ export default function PlanPage() {
       (m) => m.dayIndex === dayIndex && m.slot === slot && m.id !== meal.id,
     );
     const db = getDb();
-    if (target) {
-      await db.planMeals.put({ ...meal, dayIndex, slot });
-      await db.planMeals.put({
-        ...target,
-        dayIndex: meal.dayIndex,
-        slot: meal.slot,
-      });
-    } else {
-      await db.planMeals.put({ ...meal, dayIndex, slot });
+    try {
+      if (target) {
+        await db.planMeals.put({ ...meal, dayIndex, slot });
+        await db.planMeals.put({
+          ...target,
+          dayIndex: meal.dayIndex,
+          slot: meal.slot,
+        });
+        setStatus(`Swapped meals with ${slotTargetLabel(String(over.id))}.`);
+      } else {
+        await db.planMeals.put({ ...meal, dayIndex, slot });
+        setStatus(`Moved meal to ${slotTargetLabel(String(over.id))}.`);
+      }
+    } catch {
+      setStatus("Could not move that meal. Please try again.");
     }
   };
 
@@ -286,6 +366,9 @@ export default function PlanPage() {
         title="Your week, sorted"
         description="Breakfast, lunch, snack and dinner for seven days — built around your diet, calories and budget."
       />
+      <p role="status" aria-live="polite" className="sr-only">
+        {status}
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button
@@ -296,7 +379,7 @@ export default function PlanPage() {
           >
             <ChevronLeftIcon />
           </Button>
-          <span className="min-w-28 text-center text-sm font-medium">
+          <span aria-live="polite" className="min-w-28 text-center text-sm font-medium">
             Week of {formatWeekLabel(selectedWeekStart)}
           </span>
           <Button
@@ -360,53 +443,87 @@ export default function PlanPage() {
           description="Generate a plan for this week, or copy last week's meals and start from there."
         />
       ) : (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          onDragEnd={handleDragEnd}
+          accessibility={{
+            screenReaderInstructions: {
+              draggable:
+                "Press Enter or Space on a meal's Move button, use the arrow keys to choose a day and slot, then press Space to drop. Press Escape to cancel.",
+            },
+            announcements: {
+              onDragStart: ({ active }) =>
+                `Picked up ${String(active.data.current?.label ?? draggedMealLabel(active.id))}.`,
+              onDragOver: ({ over }) =>
+                over ? `Over ${slotTargetLabel(over.id)}.` : "No drop target.",
+              onDragEnd: ({ active, over }) =>
+                over
+                  ? `Dropped ${String(active.data.current?.label ?? draggedMealLabel(active.id))} on ${slotTargetLabel(over.id)}.`
+                  : "Move cancelled.",
+              onDragCancel: () => "Move cancelled.",
+            },
+          }}
+        >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
-          {DAYS.map((day, dayIndex) => (
-            <div key={day} className="rounded-lg border bg-card p-3">
-              <h2 className="font-semibold">{day}</h2>
-              <p className="text-xs text-muted-foreground">
-                {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
-              </p>
-              <div className="mt-2 space-y-2">
-                {SLOTS.map((slot) => {
-                  const meal = meals.find(
-                    (m) => m.dayIndex === dayIndex && m.slot === slot,
-                  );
-                  return (
-                    <DroppableSlot key={slot} id={`${dayIndex}:${slot}`}>
-                      <DraggableMeal id={meal?.id ?? `${dayIndex}-${slot}`}>
-                        <div className="rounded-md bg-muted p-2 text-sm">
-                          <div className="flex items-center justify-between gap-2">
-                        <span className="text-muted-foreground">{slot}</span>
-                        {meal && (
-                          <span className="flex gap-2">
-                            <button
-                              type="button"
-                              className="text-xs text-primary underline"
-                              onClick={() => toggleLock(meal.id)}
-                            >
-                              {meal.locked ? "Unlock" : "Lock"}
-                            </button>
-                            <button
-                              type="button"
-                              className="text-xs text-primary underline"
-                              onClick={() => setSwapTarget({ dayIndex, slot })}
-                            >
-                              Swap
-                            </button>
-                          </span>
+            {DAYS.map((day, dayIndex) => (
+              <div key={day} className="rounded-lg border bg-card p-3">
+                <h2 className="font-semibold">{day}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
+                </p>
+                <div className="mt-2 space-y-2">
+                  {SLOTS.map((slot) => {
+                    const meal = meals.find(
+                      (m) => m.dayIndex === dayIndex && m.slot === slot,
+                    );
+                    const slotLabel = `${day} ${slot}`;
+                    const recipeTitle =
+                      recipes.find((recipe) => recipe.id === meal?.recipeId)?.title ??
+                      meal?.recipeId;
+                    return (
+                      <DroppableSlot
+                        key={slot}
+                        id={`${dayIndex}:${slot}`}
+                        label={slotLabel}
+                      >
+                        {meal ? (
+                          <DraggableMeal id={meal.id} label={slotLabel}>
+                            <div className="rounded-md bg-muted p-2 text-sm">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-muted-foreground">{slot}</span>
+                                <span className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    aria-label={`${meal.locked ? "Unlock" : "Lock"} ${slotLabel}: ${recipeTitle}`}
+                                    className="text-xs text-foreground underline decoration-primary underline-offset-2"
+                                    onClick={() => toggleLock(meal.id)}
+                                  >
+                                    {meal.locked ? "Unlock" : "Lock"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    aria-label={`Swap ${slotLabel}: ${recipeTitle}`}
+                                    className="text-xs text-foreground underline decoration-primary underline-offset-2"
+                                    onClick={() => setSwapTarget({ dayIndex, slot })}
+                                  >
+                                    Swap
+                                  </button>
+                                </span>
+                              </div>
+                              <p className="truncate">{recipeTitle ?? "—"}</p>
+                            </div>
+                          </DraggableMeal>
+                        ) : (
+                          <div className="rounded-md border border-dashed bg-muted/50 p-2 text-sm text-muted-foreground">
+                            <span className="sr-only">{slotLabel}: </span>No meal — drop here
+                          </div>
                         )}
-                      </div>
-                          <p className="truncate">{meal ? meal.recipeId : "—"}</p>
-                        </div>
-                      </DraggableMeal>
-                    </DroppableSlot>
-                  );
-                })}
+                      </DroppableSlot>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </DndContext>
       )}

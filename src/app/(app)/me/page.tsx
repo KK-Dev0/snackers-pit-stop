@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { UserRoundIcon } from "lucide-react";
+import { useRef } from "react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
@@ -25,6 +26,7 @@ function AboutLink() {
 
 export default function MePage() {
   const profile = useProfile();
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   if (profile === undefined) {
     return (
@@ -125,63 +127,68 @@ export default function MePage() {
           >
             Export JSON
           </Button>
-          <label className="inline-flex">
-            <input
-              type="file"
-              accept="application/json"
-              className="hidden"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const text = await file.text();
-                try {
-                  const data = JSON.parse(text);
-                  const db = getDb();
-                  await db.transaction(
-                    "rw",
-                    [
-                      db.profile,
-                      db.pantryItems,
-                      db.plans,
-                      db.planMeals,
-                      db.savedRecipes,
-                      db.priceOverrides,
-                      db.shoppingListState,
-                      db.userStores,
-                      db.settings,
-                    ],
-                    async () => {
-                      await db.profile.clear();
-                      await db.pantryItems.clear();
-                      await db.plans.clear();
-                      await db.planMeals.clear();
-                      await db.savedRecipes.clear();
-                      await db.priceOverrides.clear();
-                      await db.shoppingListState.clear();
-                      await db.userStores.clear();
-                      await db.settings.clear();
-                      if (Array.isArray(data.profile)) await db.profile.bulkPut(data.profile);
-                      if (Array.isArray(data.pantryItems)) await db.pantryItems.bulkPut(data.pantryItems);
-                      if (Array.isArray(data.plans)) await db.plans.bulkPut(data.plans);
-                      if (Array.isArray(data.planMeals)) await db.planMeals.bulkPut(data.planMeals);
-                      if (Array.isArray(data.savedRecipes)) await db.savedRecipes.bulkPut(data.savedRecipes);
-                      if (Array.isArray(data.priceOverrides)) await db.priceOverrides.bulkPut(data.priceOverrides);
-                      if (Array.isArray(data.shoppingListState)) await db.shoppingListState.bulkPut(data.shoppingListState);
-                      if (Array.isArray(data.userStores)) await db.userStores.bulkPut(data.userStores);
-                      if (Array.isArray(data.settings)) await db.settings.bulkPut(data.settings);
-                    },
-                  );
-                  alert("Import complete");
-                } catch (err) {
-                  alert("Import failed: " + (err as Error).message);
-                }
-                e.target.value = "";
-              }}
-            />
-            <Button type="button" variant="outline" asChild>
-              <span>Import JSON</span>
-            </Button>
-          </label>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              const text = await file.text();
+              try {
+                const data = JSON.parse(text);
+                const db = getDb();
+                await db.transaction(
+                  "rw",
+                  [
+                    db.profile,
+                    db.pantryItems,
+                    db.plans,
+                    db.planMeals,
+                    db.savedRecipes,
+                    db.priceOverrides,
+                    db.shoppingListState,
+                    db.userStores,
+                    db.settings,
+                  ],
+                  async () => {
+                    await db.profile.clear();
+                    await db.pantryItems.clear();
+                    await db.plans.clear();
+                    await db.planMeals.clear();
+                    await db.savedRecipes.clear();
+                    await db.priceOverrides.clear();
+                    await db.shoppingListState.clear();
+                    await db.userStores.clear();
+                    await db.settings.clear();
+                    if (Array.isArray(data.profile)) await db.profile.bulkPut(data.profile);
+                    if (Array.isArray(data.pantryItems)) await db.pantryItems.bulkPut(data.pantryItems);
+                    if (Array.isArray(data.plans)) await db.plans.bulkPut(data.plans);
+                    if (Array.isArray(data.planMeals)) await db.planMeals.bulkPut(data.planMeals);
+                    if (Array.isArray(data.savedRecipes)) await db.savedRecipes.bulkPut(data.savedRecipes);
+                    if (Array.isArray(data.priceOverrides)) await db.priceOverrides.bulkPut(data.priceOverrides);
+                    if (Array.isArray(data.shoppingListState)) await db.shoppingListState.bulkPut(data.shoppingListState);
+                    if (Array.isArray(data.userStores)) await db.userStores.bulkPut(data.userStores);
+                    if (Array.isArray(data.settings)) await db.settings.bulkPut(data.settings);
+                  },
+                );
+                alert("Import complete");
+              } catch (err) {
+                alert("Import failed: " + (err as Error).message);
+              }
+              e.target.value = "";
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => importInputRef.current?.click()}
+          >
+            Import JSON
+          </Button>
           <Button
             type="button"
             variant="destructive"

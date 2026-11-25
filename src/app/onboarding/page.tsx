@@ -85,10 +85,13 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="mx-auto max-w-md px-4 py-8">
+    <main id="main-content" className="mx-auto max-w-md px-4 py-8">
       <div className="mb-6">
-        <Progress value={((step + 1) / STEPS.length) * 100} />
-        <p className="mt-2 text-sm text-muted-foreground">
+        <Progress
+          value={((step + 1) / STEPS.length) * 100}
+          aria-label={`Step ${step + 1} of ${STEPS.length}`}
+        />
+        <p aria-live="polite" className="mt-2 text-sm text-muted-foreground">
           Step {step + 1} of {STEPS.length}: {STEPS[step]}
         </p>
       </div>
@@ -99,13 +102,18 @@ export default function OnboardingPage() {
         {step === 0 && (
           <div className="mt-4 space-y-4">
             <div>
-              <Label>Diet type</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <Label id="diet-label">Diet type</Label>
+              <div
+                role="group"
+                aria-labelledby="diet-label"
+                className="mt-2 flex flex-wrap gap-2"
+              >
                 {DIETS.map((d) => (
                   <Button
                     key={d}
                     type="button"
                     variant={diet === d ? "default" : "outline"}
+                    aria-pressed={diet === d}
                     onClick={() => setDiet(d)}
                   >
                     {d}
@@ -114,8 +122,9 @@ export default function OnboardingPage() {
               </div>
             </div>
             <div>
-              <Label>Household servings</Label>
+              <Label htmlFor="servings">Household servings</Label>
               <Input
+                id="servings"
                 type="number"
                 value={servings}
                 onChange={(e) => setServings(Number(e.target.value))}
@@ -129,16 +138,18 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="mt-4 space-y-4">
             <div>
-              <Label>Calorie goal (per day)</Label>
+              <Label htmlFor="calorie-goal">Calorie goal (per day)</Label>
               <Input
+                id="calorie-goal"
                 type="number"
                 value={calorieGoal}
                 onChange={(e) => setCalorieGoal(Number(e.target.value))}
               />
             </div>
             <div>
-              <Label>Weekly budget (INR)</Label>
+              <Label htmlFor="weekly-budget">Weekly budget (INR)</Label>
               <Input
+                id="weekly-budget"
                 type="number"
                 value={weeklyBudget}
                 onChange={(e) => setWeeklyBudget(Number(e.target.value))}
@@ -150,8 +161,9 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="mt-4 space-y-4">
             <div>
-              <Label>Allergens (comma separated)</Label>
+              <Label htmlFor="allergens">Allergens (comma separated)</Label>
               <Input
+                id="allergens"
                 value={allergens.join(", ")}
                 onChange={(e) =>
                   setAllergens(
@@ -164,8 +176,9 @@ export default function OnboardingPage() {
               />
             </div>
             <div>
-              <Label>Dislikes (comma separated)</Label>
+              <Label htmlFor="dislikes">Dislikes (comma separated)</Label>
               <Input
+                id="dislikes"
                 value={dislikes}
                 onChange={(e) => setDislikes(e.target.value)}
               />
@@ -178,7 +191,9 @@ export default function OnboardingPage() {
             <PincodeField value={pincode} onChange={setPincode} />
             {isPincode(pincode) ? (
               loading && stores.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Loading stores…</p>
+                <p aria-live="polite" className="text-sm text-muted-foreground">
+                  Loading stores…
+                </p>
               ) : (
                 <StorePicker
                   pincode={pincode}

@@ -277,16 +277,18 @@ export function ShoppingListView() {
       />
 
       {error ? (
-        <EmptyState
-          icon={RefreshCwIcon}
-          title="Could not build the list"
-          description="The recipe catalog is unavailable right now. Please try again."
-          action={
-            <Button type="button" variant="outline" onClick={() => setRetryCount((count) => count + 1)}>
-              Retry
-            </Button>
-          }
-        />
+        <div role="alert">
+          <EmptyState
+            icon={RefreshCwIcon}
+            title="Could not build the list"
+            description="The recipe catalog is unavailable right now. Please try again."
+            action={
+              <Button type="button" variant="outline" onClick={() => setRetryCount((count) => count + 1)}>
+                Retry
+              </Button>
+            }
+          />
+        </div>
       ) : loading || !listState || !generated ? (
         <div className="space-y-3">
           <Skeleton className="h-16 w-full rounded-xl" />

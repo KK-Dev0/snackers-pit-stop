@@ -116,6 +116,7 @@ export function StorePicker({
             </div>
             <AvailabilityToggle
               storeId={store.id}
+              storeName={store.displayName}
               checked={store.selected}
               onChange={(checked) => handleToggle(store.id, checked)}
             />

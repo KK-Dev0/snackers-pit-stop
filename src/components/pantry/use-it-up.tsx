@@ -105,6 +105,14 @@ export function UseItUp() {
         </p>
       </div>
 
+      <p role="status" aria-live="polite" className="sr-only">
+        {error || pantry.length === 0
+          ? ""
+          : loading
+            ? "Finding recipes that use your pantry."
+            : `${visibleSuggestions.length} ${visibleSuggestions.length === 1 ? "recipe" : "recipes"} suggested.`}
+      </p>
+
       {pantry.length === 0 ? (
         <EmptyState
           icon={SparklesIcon}
@@ -112,23 +120,25 @@ export function UseItUp() {
           description="Add a few items above and we will surface recipes that use them first."
         />
       ) : error ? (
-        <EmptyState
-          icon={SparklesIcon}
-          title="Could not load suggestions"
-          description="The recommendation service is unavailable right now. Please try again."
-          action={
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setError(false);
-                setRetryCount((count) => count + 1);
-              }}
-            >
-              Retry
-            </Button>
-          }
-        />
+        <div role="alert">
+          <EmptyState
+            icon={SparklesIcon}
+            title="Could not load suggestions"
+            description="The recommendation service is unavailable right now. Please try again."
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setError(false);
+                  setRetryCount((count) => count + 1);
+                }}
+              >
+                Retry
+              </Button>
+            }
+          />
+        </div>
       ) : loading && visibleSuggestions.length === 0 ? (
         <div className="grid gap-3 sm:grid-cols-2">
           {Array.from({ length: 4 }, (_, index) => (
