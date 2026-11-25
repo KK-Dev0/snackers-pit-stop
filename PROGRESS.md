@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 47 of 112 complete · **Current:** M2 complete — next is task 48.
+**Status:** 48 of 112 complete · **Current:** M4 in progress — next is task 68.
 
 ## How to use
 
@@ -88,7 +88,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 66. **Gate M3.** Lint, typecheck, unit tests, and a manual onboarding→plan pass; commit `feat: onboarding and weekly planner`.
 
 ### M4 — Import flows
-- [ ] 67. **Build the LLM wrapper.** Provider-agnostic chat/vision client from env with timeouts, token caps and typed errors.
+- [x] 67. **Build the LLM wrapper.** Provider-agnostic chat/vision client from env with timeouts, token caps and typed errors.
 - [ ] 68. **Add strict JSON generation.** Zod-validated output with exactly one repair retry; test invalid→valid.
 - [ ] 69. **Add IP rate limiting.** Hashed-IP sliding window utility with per-route limits and tests; apply it to all LLM/import routes.
 - [ ] 70. **Build safe URL fetching.** http/https only, private-IP blocking, 8 s timeout, 2 MB cap, content-type checks, and tests.
