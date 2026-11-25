@@ -75,7 +75,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 53. **Step 3: preferences.** Allergen and dislike chips with custom entry and a best-effort filtering note.
 - [x] 54. **Step 4: location + stores.** Manual pincode for now (geo arrives in M6) plus store selection; finishing saves the profile and routes to Plan.
 - [x] 55. **Add profile summary.** Me page shows diet, goals, budget, allergens, pincode and stores, with edit links back into onboarding.
-- [ ] 56. **Data export/import/clear.** JSON export, import with Zod validation, and clear all data with confirmation.
+- [x] 56. **Data export/import/clear.** JSON export, import with Zod validation, and clear all data with confirmation.
 - [ ] 57. **Write the planner algorithm.** Deterministic seeded selection across 7 days × 4 slots with calorie targets, budget cap, variety and locks as pure functions.
 - [ ] 58. **Test the planner.** Locks respected, no repeats, calorie/budget bounds, and deterministic output for the same seed.
 - [ ] 59. **Add the recommend endpoint.** `POST /api/recipes/recommend` validates filters/pantry, rate-limits, and returns a ranked pool.
