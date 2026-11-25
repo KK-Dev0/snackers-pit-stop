@@ -68,7 +68,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 
 ### M3 — Onboarding and planner
 - [x] 48. **Set up Dexie.** Versioned IndexedDB schema for profile, pantry, plans, meals, imports, price overrides, list state, stores and settings.
-- [ ] 49. **Add client repositories.** Typed CRUD and React hooks for profile, pantry, plans, imports and stores using live queries.
+- [x] 49. **Add client repositories.** Typed CRUD and React hooks for profile, pantry, plans, imports and stores using live queries.
 - [ ] 50. **Build the onboarding shell.** Four steps, progress indicator, skip/resume, and redirect rules based on `onboardedAt`.
 - [ ] 51. **Step 1: diet.** Diet type and household servings with accessible radio cards.
 - [ ] 52. **Step 2: goals.** Calorie goal and weekly INR budget with validation and sensible defaults.
