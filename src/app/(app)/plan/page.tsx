@@ -1,7 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
 import { CalendarDaysIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
@@ -21,13 +31,36 @@ import { useProfile } from "@/client/hooks/use-profile";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { getDb } from "@/client/db/dexie";
 import { generatePlan, eligibleRecipes } from "@/lib/planner";
-import type { Ingredient, Recipe } from "@/lib/schemas";
+import type { Ingredient, MealSlot, Recipe } from "@/lib/schemas";
 import { FuelGauge } from "@/components/common/fuel-gauge";
 import { recipeNutrition } from "@/lib/nutrition";
 import { recipeCost } from "@/lib/cost";
 
 const SLOTS = ["breakfast", "lunch", "snack", "dinner"] as const;
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+function DraggableMeal({ id, children }: { id: string; children: ReactNode }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      style={{ opacity: isDragging ? 0.5 : 1, cursor: "grab", touchAction: "pan-y" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DroppableSlot({ id, children }: { id: string; children: ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div ref={setNodeRef} className={isOver ? "rounded-md ring-2 ring-primary" : undefined}>
+      {children}
+    </div>
+  );
+}
 
 export default function PlanPage() {
   const profile = useProfile();
@@ -38,6 +71,10 @@ export default function PlanPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; slot: string } | null>(null);
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor),
+  );
 
   useEffect(() => {
     Promise.all([
@@ -161,6 +198,31 @@ export default function PlanPage() {
     }
   };
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    const meal = meals.find((m) => m.id === active.id);
+    if (!meal) return;
+    const [dayStr, slotRaw] = String(over.id).split(":");
+    const slot = slotRaw as MealSlot;
+    const dayIndex = Number(dayStr);
+    if (!Number.isInteger(dayIndex) || !SLOTS.includes(slot as any)) return;
+    const target = meals.find(
+      (m) => m.dayIndex === dayIndex && m.slot === slot && m.id !== meal.id,
+    );
+    const db = getDb();
+    if (target) {
+      await db.planMeals.put({ ...meal, dayIndex, slot });
+      await db.planMeals.put({
+        ...target,
+        dayIndex: meal.dayIndex,
+        slot: meal.slot,
+      });
+    } else {
+      await db.planMeals.put({ ...meal, dayIndex, slot });
+    }
+  };
+
   const alternatives = swapTarget
     ? eligibleRecipes(
         recipes,
@@ -222,7 +284,8 @@ export default function PlanPage() {
           description="Finish onboarding and generate a week of meals in one tap. Swaps and locks arrive with the planner."
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
           {DAYS.map((day, dayIndex) => (
             <div key={day} className="rounded-lg border bg-card p-3">
               <h2 className="font-semibold">{day}</h2>
@@ -235,8 +298,10 @@ export default function PlanPage() {
                     (m) => m.dayIndex === dayIndex && m.slot === slot,
                   );
                   return (
-                    <div key={slot} className="rounded-md bg-muted p-2 text-sm">
-                      <div className="flex items-center justify-between gap-2">
+                    <DroppableSlot key={slot} id={`${dayIndex}:${slot}`}>
+                      <DraggableMeal id={meal?.id ?? `${dayIndex}-${slot}`}>
+                        <div className="rounded-md bg-muted p-2 text-sm">
+                          <div className="flex items-center justify-between gap-2">
                         <span className="text-muted-foreground">{slot}</span>
                         {meal && (
                           <span className="flex gap-2">
@@ -257,14 +322,17 @@ export default function PlanPage() {
                           </span>
                         )}
                       </div>
-                      <p className="truncate">{meal ? meal.recipeId : "—"}</p>
-                    </div>
+                          <p className="truncate">{meal ? meal.recipeId : "—"}</p>
+                        </div>
+                      </DraggableMeal>
+                    </DroppableSlot>
                   );
                 })}
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        </DndContext>
       )}
 
       <Sheet open={!!swapTarget} onOpenChange={(open) => !open && setSwapTarget(null)}>
