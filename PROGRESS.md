@@ -76,8 +76,8 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 54. **Step 4: location + stores.** Manual pincode for now (geo arrives in M6) plus store selection; finishing saves the profile and routes to Plan.
 - [x] 55. **Add profile summary.** Me page shows diet, goals, budget, allergens, pincode and stores, with edit links back into onboarding.
 - [x] 56. **Data export/import/clear.** JSON export, import with Zod validation, and clear all data with confirmation.
-- [ ] 57. **Write the planner algorithm.** Deterministic seeded selection across 7 days × 4 slots with calorie targets, budget cap, variety and locks as pure functions.
-- [ ] 58. **Test the planner.** Locks respected, no repeats, calorie/budget bounds, and deterministic output for the same seed.
+- [x] 57. **Write the planner algorithm.** Deterministic seeded selection across 7 days × 4 slots with calorie targets, budget cap, variety and locks as pure functions.
+- [x] 58. **Test the planner.** Locks respected, no repeats, calorie/budget bounds, and deterministic output for the same seed.
 - [ ] 59. **Add the recommend endpoint.** `POST /api/recipes/recommend` validates filters/pantry, rate-limits, and returns a ranked pool.
 - [ ] 60. **Build the planner page.** 7-day grid with meal cards, skeletons, an empty state, and a "Generate plan" action.
 - [ ] 61. **Add day and week meters.** Per-day calories/cost plus a fuel-gauge weekly budget meter with accessible values.
