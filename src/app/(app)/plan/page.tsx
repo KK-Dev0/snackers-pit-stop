@@ -12,7 +12,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { CalendarDaysIcon } from "lucide-react";
+import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
@@ -31,7 +31,8 @@ import { useProfile } from "@/client/hooks/use-profile";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { getDb } from "@/client/db/dexie";
 import { generatePlan, eligibleRecipes } from "@/lib/planner";
-import type { Ingredient, MealSlot, Recipe } from "@/lib/schemas";
+import type { Ingredient, MealSlot, Plan, Recipe } from "@/lib/schemas";
+import { addDays, formatWeekLabel, weekStartForDate } from "@/lib/weeks";
 import { FuelGauge } from "@/components/common/fuel-gauge";
 import { recipeNutrition } from "@/lib/nutrition";
 import { recipeCost } from "@/lib/cost";
@@ -65,7 +66,13 @@ function DroppableSlot({ id, children }: { id: string; children: ReactNode }) {
 export default function PlanPage() {
   const profile = useProfile();
   const plans = usePlans();
-  const activePlanId = plans[0]?.id ?? null;
+  const currentWeekStart = weekStartForDate(new Date());
+  const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStart);
+  const activePlan = plans.find((p) => p.weekStart === selectedWeekStart);
+  const activePlanId = activePlan?.id ?? null;
+  const previousPlan = plans.find(
+    (p) => p.weekStart === addDays(selectedWeekStart, -7),
+  );
   const meals = usePlanMeals(activePlanId);
   const [loading, setLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -126,7 +133,7 @@ export default function PlanPage() {
     if (!profile) return;
     setLoading(true);
     try {
-      const weekStart = new Date().toISOString().slice(0, 10);
+      const weekStart = selectedWeekStart;
       const res = await fetch(`/api/recipes?limit=100&diet=${profile.diet}`);
       const data = await res.json();
       const recipes = (data.items ?? []) as Recipe[];
@@ -143,6 +150,36 @@ export default function PlanPage() {
       await db.plans.put(plan);
       await db.planMeals.where("planId").equals(plan.id).delete();
       await db.planMeals.bulkPut(generated);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyLastWeek = async () => {
+    if (!previousPlan) return;
+    setLoading(true);
+    try {
+      const db = getDb();
+      const previousMeals = await db.planMeals
+        .where("planId")
+        .equals(previousPlan.id)
+        .toArray();
+      const now = Date.now();
+      const plan: Plan = {
+        id: `plan-${selectedWeekStart}`,
+        weekStart: selectedWeekStart,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const copied = previousMeals.map((meal, index) => {
+        const suffix = meal.id.startsWith(previousPlan.id)
+          ? meal.id.slice(previousPlan.id.length)
+          : `-${index}`;
+        return { ...meal, id: `${plan.id}${suffix}`, planId: plan.id };
+      });
+      await db.plans.put(plan);
+      await db.planMeals.where("planId").equals(plan.id).delete();
+      await db.planMeals.bulkPut(copied);
     } finally {
       setLoading(false);
     }
@@ -245,21 +282,60 @@ export default function PlanPage() {
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
       <PageHeader
-        eyebrow="This week"
+        eyebrow="Planner"
         title="Your week, sorted"
         description="Breakfast, lunch, snack and dinner for seven days — built around your diet, calories and budget."
       />
-      <div className="flex justify-end">
-        <Button
-          variant="outline"
-          onClick={regenerate}
-          disabled={loading || !profile || meals.length === 0}
-        >
-          Regenerate
-        </Button>
-        <Button onClick={generate} disabled={loading || !profile}>
-          {loading ? "Generating…" : "Generate plan"}
-        </Button>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Previous week"
+            onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, -7))}
+          >
+            <ChevronLeftIcon />
+          </Button>
+          <span className="min-w-28 text-center text-sm font-medium">
+            Week of {formatWeekLabel(selectedWeekStart)}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="Next week"
+            onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, 7))}
+          >
+            <ChevronRightIcon />
+          </Button>
+          {selectedWeekStart !== currentWeekStart && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedWeekStart(currentWeekStart)}
+            >
+              This week
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={copyLastWeek}
+            disabled={loading || !previousPlan || !!activePlan}
+          >
+            Copy last week
+          </Button>
+          <Button
+            variant="outline"
+            onClick={regenerate}
+            disabled={loading || !profile || meals.length === 0}
+          >
+            Regenerate
+          </Button>
+          <Button onClick={generate} disabled={loading || !profile}>
+            {loading ? "Generating…" : "Generate plan"}
+          </Button>
+        </div>
       </div>
 
       {profile && meals.length > 0 && (
@@ -281,7 +357,7 @@ export default function PlanPage() {
         <EmptyState
           icon={CalendarDaysIcon}
           title="No plan yet"
-          description="Finish onboarding and generate a week of meals in one tap. Swaps and locks arrive with the planner."
+          description="Generate a plan for this week, or copy last week's meals and start from there."
         />
       ) : (
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>

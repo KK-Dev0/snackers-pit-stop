@@ -22,24 +22,22 @@ export function usePlans() {
 }
 
 export function usePlanMeals(planId: string | null) {
-  const [meals, setMeals] = useState<PlanMeal[]>([]);
+  const [state, setState] = useState<{ planId: string | null; meals: PlanMeal[] }>({
+    planId,
+    meals: [],
+  });
 
   useEffect(() => {
-    if (!planId) {
-      return;
-    }
+    if (!planId) return;
     const db = getDb();
     const sub = liveQuery(() =>
       db.planMeals.where("planId").equals(planId).toArray(),
     ).subscribe({
-      next: (value) => setMeals(value as PlanMeal[]),
+      next: (value) => setState({ planId, meals: value as PlanMeal[] }),
       error: (err) => console.error(err),
     });
-    return () => {
-      sub.unsubscribe();
-      setMeals([]);
-    };
+    return () => sub.unsubscribe();
   }, [planId]);
 
-  return meals;
+  return state.planId === planId ? state.meals : [];
 }
