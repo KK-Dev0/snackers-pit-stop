@@ -37,7 +37,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 17. **Model stores.** `stores`, `pincode_stores`, and `store_confirmations` tables with indexes and no PII.
 - [x] 18. **Add migrations + FTS5.** Generate the initial migration, create the `recipe_fts` virtual table, and add a rebuild step to the seed pipeline.
 - [x] 19. **Seed ingredients 1/4.** ~40 staples: grains, dals, flours, rice, oats and pasta with per-100 g nutrition and prices.
-- [ ] 20. **Seed ingredients 2/4.** ~40 produce and dairy items with aisle, unit, nutrition, and prices.
+- [x] 20. **Seed ingredients 2/4.** ~40 produce and dairy items with aisle, unit, nutrition, and prices.
 - [ ] 21. **Seed ingredients 3/4.** ~40 spices, oils, condiments and aromatics with realistic small-unit prices.
 - [ ] 22. **Seed ingredients 4/4.** ~30 proteins, eggs, nuts and packaged items; add a seed test for unique ids and sane values.
 - [ ] 23. **Seed recipes 1/13.** Five budget breakfasts (poha, upma, besan chilla, masala oats, veg sandwich) with structured ingredients and steps.
