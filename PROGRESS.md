@@ -51,7 +51,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 31. **Seed recipes 9/13.** Five vegan dishes (chana masala, tofu bhurji, vegetable khichdi, peanut chutney rice, dal palak).
 - [x] 32. **Seed recipes 10/13.** Five vegan dishes (sambar rice, lemon rice, coconut vegetable curry, chole palak, roasted veg wrap).
 - [x] 33. **Seed recipes 11/13.** Five one-pot/rice dishes (veg biryani, jeera rice dal, masala khichdi, tomato bath, curd rice bowl).
-- [ ] 34. **Seed recipes 12/13.** Five snacks (onion pakora, dhokla, bhel, grilled sandwich, fruit chaat).
+- [x] 34. **Seed recipes 12/13.** Five snacks (onion pakora, dhokla, bhel, grilled sandwich, fruit chaat).
 - [ ] 35. **Seed recipes 13/13.** Five regional/high-protein dishes (litti chokha, cholar dal, soya chunk curry, sprout salad, paneer tikka bowl); add a recipe integrity test.
 - [ ] 36. **Seed stores + pincodes.** Blinkit, Zepto, Instamart, Apna Mart and local kirana, plus Asansol pincode rows marked unverified.
 - [ ] 37. **Define shared Zod schemas.** Profile, ingredient, recipe, recipe draft, plan, shopping list, store and API schemas with inferred types.
