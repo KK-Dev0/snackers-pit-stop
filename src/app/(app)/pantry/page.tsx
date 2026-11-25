@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { PantryManager } from "@/components/pantry/pantry-manager";
+import { UseItUp } from "@/components/pantry/use-it-up";
 
 export const metadata = { title: "Pantry" };
 
@@ -13,6 +14,7 @@ export default function PantryPage() {
         description="Tell us what is already on the shelf and the plan will lean on it."
       />
       <PantryManager />
+      <UseItUp />
     </PageReveal>
   );
 }
