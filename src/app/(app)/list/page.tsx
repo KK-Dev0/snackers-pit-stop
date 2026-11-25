@@ -2,12 +2,13 @@ import { ListChecksIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
+import { PageReveal } from "@/components/motion/page-reveal";
 
 export const metadata = { title: "Shopping list" };
 
 export default function ListPage() {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
+    <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
       <PageHeader
         eyebrow="One trip"
         title="Shopping list"
@@ -18,6 +19,6 @@ export default function ListPage() {
         title="Nothing to shop for yet"
         description="Generate a plan and the merged list appears here, minus what you already have."
       />
-    </div>
+    </PageReveal>
   );
 }

@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 6 of 112 complete · **Current:** M1 in progress — next is task 7.
+**Status:** 7 of 112 complete · **Current:** M1 in progress — next is task 8.
 
 ## How to use
 
@@ -21,7 +21,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 4. **Install shadcn/ui.** Init `components.json` and add button, card, input, label, textarea, select, checkbox, switch, tabs, dialog, sheet, dropdown-menu, badge, skeleton, progress, separator, tooltip, sonner.
 - [x] 5. **Add theming.** `next-themes` provider, no-flash script, theme toggle, and system/light/dark persistence.
 - [x] 6. **Build the app shell.** Root layout metadata/viewport, skip link, desktop top nav, mobile bottom tab bar, and stub routes for Plan, Recipes, Pantry, List, Me, Onboarding.
-- [ ] 7. **Add motion primitives.** `PageReveal`, `StaggerList`, `CardLift`, and a reduced-motion hook; cap app-screen animations at 400 ms.
+- [x] 7. **Add motion primitives.** `PageReveal`, `StaggerList`, `CardLift`, and a reduced-motion hook; cap app-screen animations at 400 ms.
 - [ ] 8. **Build the landing hero.** Headline, subcopy, CTAs, and a lightweight animated pit-stop/checkered-flag motif that respects reduced motion.
 - [ ] 8b. **Add the R3F hero scene.** Install three, @types/three and @react-three/fiber. Build a low-poly scene (about 10 simple meshes, no shadows, no postprocessing, avoid drei unless needed) in a client component loaded with next/dynamic and ssr:false, only when the hero is in view. Cap dpr at 1.5, pause rendering when the tab is hidden or the hero is offscreen, keep touch scrolling working (touch-action: pan-y), and fall back to a static CSS/SVG hero when prefers-reduced-motion is set, WebGL is unavailable, or the device looks low-end. Verify with build and Lighthouse mobile. If it exceeds 20 minutes, split it.
 - [ ] 9. **Build landing sections.** Three-step "how it works", feature cards, and the "free, private, no signup" band.

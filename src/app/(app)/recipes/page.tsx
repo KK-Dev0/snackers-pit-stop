@@ -2,12 +2,13 @@ import { ChefHatIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
+import { PageReveal } from "@/components/motion/page-reveal";
 
 export const metadata = { title: "Recipes" };
 
 export default function RecipesPage() {
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
+    <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
       <PageHeader
         eyebrow="Cookbook"
         title="Recipes"
@@ -18,6 +19,6 @@ export default function RecipesPage() {
         title="The catalog is on its way"
         description="Search, filters and recipe detail land once the seed catalog is wired up."
       />
-    </div>
+    </PageReveal>
   );
 }
