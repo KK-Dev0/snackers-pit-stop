@@ -2,7 +2,9 @@ import { ChefHatIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
+import { PhotoImportButton } from "@/components/recipes/photo-import-button";
 import { PageReveal } from "@/components/motion/page-reveal";
+import { photoImportEnabled } from "@/lib/feature-flags";
 
 export const metadata = { title: "Recipes" };
 
@@ -14,6 +16,7 @@ export default function RecipesPage() {
         title="Recipes"
         description="Budget-friendly home cooking, plus anything you import from a link or a photo."
       />
+      <PhotoImportButton enabled={photoImportEnabled()} />
       <EmptyState
         icon={ChefHatIcon}
         title="The catalog is on its way"

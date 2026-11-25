@@ -8,43 +8,18 @@ import {
   type SafeFetchResult,
 } from "@/server/import/safe-fetch";
 import { parseRecipeJsonLd } from "@/server/import/jsonld";
+import {
+  failure,
+  llmErrorCode,
+  llmStatus,
+  NO_STORE,
+  safeFetchStatus,
+} from "@/server/import/route-errors";
 import { generateJson, JsonGenerationError } from "@/server/llm/json";
 import { LlmError } from "@/server/llm/provider";
 import { pageText, recipeExtractionMessages } from "@/server/llm/prompts";
 
 export const runtime = "nodejs";
-
-const NO_STORE = { "Cache-Control": "no-store" };
-
-function failure(error: string, code: string, status: number) {
-  return NextResponse.json({ error, code }, { status, headers: NO_STORE });
-}
-
-function safeFetchStatus(error: SafeFetchError): number {
-  switch (error.code) {
-    case "invalid_url":
-    case "blocked_host":
-    case "content_type":
-      return 400;
-    case "too_large":
-      return 413;
-    case "timeout":
-      return 504;
-    case "dns":
-    case "http":
-    case "network":
-      return 502;
-  }
-}
-
-function llmStatus(error: LlmError | JsonGenerationError): number {
-  if (error instanceof LlmError) {
-    if (error.code === "configuration") return 503;
-    if (error.status === 429) return 429;
-    if (error.code === "timeout") return 504;
-  }
-  return 422;
-}
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -104,8 +79,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     if (error instanceof LlmError || error instanceof JsonGenerationError) {
-      const code = error instanceof LlmError ? error.code : error.reason;
-      return failure(error.message, code, llmStatus(error));
+      return failure(error.message, llmErrorCode(error), llmStatus(error));
     }
     return failure("Could not extract a recipe from that page.", "extraction_failed", 422);
   }
