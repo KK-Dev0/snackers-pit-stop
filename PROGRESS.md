@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 8 of 112 complete · **Current:** M1 in progress — next is task 8b.
+**Status:** 9 of 112 complete · **Current:** M1 in progress — next is task 9.
 
 ## How to use
 
@@ -23,7 +23,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 6. **Build the app shell.** Root layout metadata/viewport, skip link, desktop top nav, mobile bottom tab bar, and stub routes for Plan, Recipes, Pantry, List, Me, Onboarding.
 - [x] 7. **Add motion primitives.** `PageReveal`, `StaggerList`, `CardLift`, and a reduced-motion hook; cap app-screen animations at 400 ms.
 - [x] 8. **Build the landing hero.** Headline, subcopy, CTAs, and a lightweight animated pit-stop/checkered-flag motif that respects reduced motion.
-- [ ] 8b. **Add the R3F hero scene.** Install three, @types/three and @react-three/fiber. Build a low-poly scene (about 10 simple meshes, no shadows, no postprocessing, avoid drei unless needed) in a client component loaded with next/dynamic and ssr:false, only when the hero is in view. Cap dpr at 1.5, pause rendering when the tab is hidden or the hero is offscreen, keep touch scrolling working (touch-action: pan-y), and fall back to a static CSS/SVG hero when prefers-reduced-motion is set, WebGL is unavailable, or the device looks low-end. Verify with build and Lighthouse mobile. If it exceeds 20 minutes, split it.
+- [x] 8b. **Add the R3F hero scene.** Install three, @types/three and @react-three/fiber. Build a low-poly scene (about 10 simple meshes, no shadows, no postprocessing, avoid drei unless needed) in a client component loaded with next/dynamic and ssr:false, only when the hero is in view. Cap dpr at 1.5, pause rendering when the tab is hidden or the hero is offscreen, keep touch scrolling working (touch-action: pan-y), and fall back to a static CSS/SVG hero when prefers-reduced-motion is set, WebGL is unavailable, or the device looks low-end. Verify with build and Lighthouse mobile. If it exceeds 20 minutes, split it.
 - [ ] 9. **Build landing sections.** Three-step "how it works", feature cards, and the "free, private, no signup" band.
 - [ ] 10. **Finish the landing page.** Footer, final CTA, scroll reveals, responsive polish, and accessible landmarks/headings.
 - [ ] 11. **Audit landing quality.** Keyboard pass, contrast check, font/image weight, and fix what the audit finds.

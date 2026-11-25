@@ -6,6 +6,7 @@ import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CheckeredFlag } from "@/components/landing/checkered-flag";
+import { HeroVisual } from "@/components/landing/hero-visual";
 import { PitBoard } from "@/components/landing/pit-board";
 import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -80,7 +81,13 @@ export function Hero() {
           transition={{ duration: motionTokens.duration.slow, ease: [...motionTokens.ease], delay: 0.12 }}
           className="relative"
         >
-          <PitBoard />
+          <figure className="overflow-hidden rounded-3xl border border-border bg-card shadow-lift">
+            <HeroVisual className="h-48 border-b border-border/60 sm:h-56" />
+            <PitBoard />
+            <figcaption className="sr-only">
+              Illustration of a weekly plan using ₹1,850 of a ₹2,500 budget.
+            </figcaption>
+          </figure>
           <p className="mt-3 text-center text-xs text-muted-foreground">
             Illustrative plan. All nutrition and costs are estimates.
           </p>

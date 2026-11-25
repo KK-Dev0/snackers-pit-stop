@@ -17,9 +17,9 @@ const WEEK = [
  * A mock "pit board" for the hero: a week strip and the budget gauge. The week
  * strip is decorative; the budget numbers remain real text.
  */
-export function PitBoard() {
+export function PitBoard({ className }: { className?: string }) {
   return (
-    <figure className="relative rounded-3xl border border-border bg-card p-5 shadow-lift sm:p-6">
+    <div className={`p-5 sm:p-6 ${className ?? ""}`}>
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
@@ -76,10 +76,6 @@ export function PitBoard() {
           <p className="text-sm font-medium">18 items</p>
         </div>
       </div>
-
-      <figcaption className="sr-only">
-        Illustration of a weekly plan using ₹1,850 of a ₹2,500 budget.
-      </figcaption>
-    </figure>
+    </div>
   );
 }
