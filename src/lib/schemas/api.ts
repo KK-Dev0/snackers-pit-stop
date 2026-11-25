@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { AllergenSchema, DietTypeSchema, MealSlotSchema } from "./common";
+import { PincodeSchema } from "./geo";
 
 export const RecipeListQuerySchema = z.object({
   q: z.string().optional(),
@@ -35,11 +36,11 @@ export const GeoReverseRequestSchema = z.object({
 });
 
 export const StoresQuerySchema = z.object({
-  pincode: z.string().regex(/^[1-9][0-9]{5}$/),
+  pincode: PincodeSchema,
 });
 
 export const ConfirmStoreRequestSchema = z.object({
-  pincode: z.string().regex(/^[1-9][0-9]{5}$/),
+  pincode: PincodeSchema,
   storeId: z.string().min(1),
 });
 
