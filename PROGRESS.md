@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 56 of 112 complete · **Current:** M4 in progress — next is task 76.
+**Status:** 57 of 112 complete · **Current:** M4 in progress — next is task 77.
 
 ## How to use
 
@@ -97,7 +97,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 73. **Write the extraction prompt.** Strict JSON recipe schema, no invented nutrition or prices, source attribution, and refusal rules.
 - [x] 74. **Add photo import (optional).** `POST /api/import/photo` with image type/size validation and a vision model returning the same draft schema; gated behind `PHOTO_IMPORT_ENABLED=false` by default and hidden in the UI while disabled.
 - [x] 75. **Build the import review form.** Editable title, servings, ingredients, units, steps, diet/allergen tags and source link.
-- [ ] 76. **Save imports locally.** Persist to Dexie, list under "My imports", support delete, and render a local recipe detail route.
+- [x] 76. **Save imports locally.** Persist to Dexie, list under "My imports", support delete, and render a local recipe detail route.
 - [ ] 77. **Build recipe browsing.** Search, diet/allergen filters, sort, limit, cards and skeletons.
 - [ ] 78. **Build recipe detail.** Servings scaling, computed nutrition/cost estimates, add-to-plan, and source link.
 - [ ] 79. **Polish import UX.** Entry points, progress, validation errors, retry, and "review before saving" messaging.
