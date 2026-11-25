@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 61 of 112 complete · **Current:** M4 complete — next is task 81.
+**Status:** 62 of 112 complete · **Current:** M5 in progress — next is task 82.
 
 ## How to use
 
@@ -104,7 +104,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 80. **Gate M4.** Lint, typecheck, tests, and a manual URL/photo import; commit `feat: recipe import from URL and photo`.
 
 ### M5 — Pantry and shopping list
-- [ ] 81. **Build pantry CRUD.** Add/edit/delete items with quantity, unit and staple toggle; persist in Dexie.
+- [x] 81. **Build pantry CRUD.** Add/edit/delete items with quantity, unit and staple toggle; persist in Dexie.
 - [ ] 82. **Polish pantry.** Search/sort, empty state, and quick-add suggestions from seeded ingredients.
 - [ ] 83. **Add "use it up".** Rank recipes by pantry overlap and surface them on Pantry with reasons.
 - [ ] 84. **Normalize and merge ingredients.** Alias mapping, canonical units and merge rules; unit tests.

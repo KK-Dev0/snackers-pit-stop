@@ -1,8 +1,6 @@
-import { ShoppingBasketIcon } from "lucide-react";
-
-import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
+import { PantryManager } from "@/components/pantry/pantry-manager";
 
 export const metadata = { title: "Pantry" };
 
@@ -14,11 +12,7 @@ export default function PantryPage() {
         title="Pantry"
         description="Tell us what is already on the shelf and the plan will lean on it."
       />
-      <EmptyState
-        icon={ShoppingBasketIcon}
-        title="Nothing in the pantry yet"
-        description="Add staples and leftovers to get recipes that use them up first."
-      />
+      <PantryManager />
     </PageReveal>
   );
 }
