@@ -1,6 +1,8 @@
+import { SerwistProvider } from "@serwist/next/react";
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 
+import { OfflineBanner } from "@/components/common/offline-banner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 import "./globals.css";
@@ -68,7 +70,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SerwistProvider
+            swUrl="/sw.js"
+            disable={process.env.NODE_ENV === "development"}
+            reloadOnOnline={false}
+          >
+            <OfflineBanner />
+            {children}
+          </SerwistProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
