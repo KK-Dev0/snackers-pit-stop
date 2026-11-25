@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 81 of 112 complete · **Current:** M6 complete — next is task 101.
+**Status:** 101 of 111 complete · **Current:** M7 in progress — next is task 102.
 
 ## How to use
 
@@ -128,7 +128,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 100. **Gate M6.** Lint, typecheck, tests, and a manual pincode flow; commit `feat: location and store availability`.
 
 ### M7 — Polish, tests, PWA, README
-- [ ] 101. **Add the PWA manifest.** Name, icons (192/512/maskable), theme colors, standalone display, and install metadata.
+- [x] 101. **Add the PWA manifest.** Name, icons (192/512/maskable), theme colors, standalone display, and install metadata.
 - [ ] 102. **Add the service worker.** Serwist offline shell, static caching, network-first API fallback, and an offline banner.
 - [ ] 103. **Add the About and Disclaimers page.** Not medical advice, estimates only, allergen filtering is best-effort, no affiliation with listed stores; link it from the footer and Me.
 - [ ] 104. **Accessibility audit.** Keyboard paths, focus-visible, labels/aria, heading order, live regions, and contrast fixes.
