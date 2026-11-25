@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 11 of 112 complete · **Current:** M1 in progress — next is task 11.
+**Status:** 12 of 112 complete · **Current:** M1 in progress — next is task 12.
 
 ## How to use
 
@@ -26,7 +26,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 8b. **Add the R3F hero scene.** Install three, @types/three and @react-three/fiber. Build a low-poly scene (about 10 simple meshes, no shadows, no postprocessing, avoid drei unless needed) in a client component loaded with next/dynamic and ssr:false, only when the hero is in view. Cap dpr at 1.5, pause rendering when the tab is hidden or the hero is offscreen, keep touch scrolling working (touch-action: pan-y), and fall back to a static CSS/SVG hero when prefers-reduced-motion is set, WebGL is unavailable, or the device looks low-end. Verify with build and Lighthouse mobile. If it exceeds 20 minutes, split it.
 - [x] 9. **Build landing sections.** Three-step "how it works", feature cards, and the "free, private, no signup" band.
 - [x] 10. **Finish the landing page.** Footer, final CTA, scroll reveals, responsive polish, and accessible landmarks/headings.
-- [ ] 11. **Audit landing quality.** Keyboard pass, contrast check, font/image weight, and fix what the audit finds.
+- [x] 11. **Audit landing quality.** Keyboard pass, contrast check, font/image weight, and fix what the audit finds.
 - [ ] 12. **Gate M1.** Run lint, typecheck, and build; smoke-check mobile and desktop; commit `feat: scaffold, design system, and landing page`.
 
 ### M2 — Data model, seed data, retrieval

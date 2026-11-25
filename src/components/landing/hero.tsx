@@ -82,7 +82,7 @@ export function Hero() {
           className="relative"
         >
           <figure className="overflow-hidden rounded-3xl border border-border bg-card shadow-lift">
-            <HeroVisual className="h-48 border-b border-border/60 sm:h-56" />
+            <HeroVisual className="h-52 border-b border-border/60 sm:h-64" />
             <PitBoard />
             <figcaption className="sr-only">
               Illustration of a weekly plan using ₹1,850 of a ₹2,500 budget.

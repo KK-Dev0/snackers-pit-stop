@@ -36,7 +36,7 @@ function canRenderScene() {
 
   const cores = navigator.hardwareConcurrency ?? 8;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  sceneCapability = cores > 4 && memory > 2;
+  sceneCapability = cores >= 4 && memory > 2;
   return sceneCapability;
 }
 

@@ -19,7 +19,7 @@ const LIGHT: SceneColors = {
   bodyDark: "#163a2b",
   accent: "#b45309",
   screen: "#faf4e8",
-  ground: "#efe6d6",
+  ground: "#e7dcc7",
   neutral: "#1b2a22",
 };
 
@@ -28,7 +28,7 @@ const DARK: SceneColors = {
   bodyDark: "#4f8a70",
   accent: "#f0a83c",
   screen: "#1a211c",
-  ground: "#232b25",
+  ground: "#2f3a32",
   neutral: "#ede6d6",
 };
 
@@ -158,7 +158,7 @@ export function HeroScene({
       className={className}
       frameloop={active ? "always" : "never"}
       dpr={[1, 1.5]}
-      camera={{ position: [2.7, 1.9, 3.5], fov: 34 }}
+      camera={{ position: [2.0, 1.55, 2.7], fov: 36 }}
       gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
       onCreated={({ camera }) => camera.lookAt(0, 0.55, 0)}
       style={{ touchAction: "pan-y" }}
