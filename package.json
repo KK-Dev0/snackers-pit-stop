@@ -10,6 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "drizzle-kit generate",
@@ -46,6 +48,7 @@
   },
   "devDependencies": {
     "@next/env": "^16.4.6",
+    "@playwright/test": "^1.65.1",
     "@serwist/cli": "^9.6.0",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^24.19.2",
