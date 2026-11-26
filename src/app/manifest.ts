@@ -16,7 +16,9 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ["standalone", "minimal-ui"],
     orientation: "portrait-primary",
     background_color: "#faf4e8",
-    theme_color: "#faf4e8",
+    // A brand colour that reads as intended in both light and dark install chrome;
+    // the live browser theme colour is kept in sync by ThemeColorSync.
+    theme_color: "#1f4d3a",
     categories: ["food", "lifestyle", "productivity"],
     prefer_related_applications: false,
     icons: [

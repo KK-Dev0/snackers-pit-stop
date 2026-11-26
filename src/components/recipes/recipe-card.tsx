@@ -9,7 +9,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
   return (
     <Link
       href={`/recipes/${recipe.slug}`}
-      className="group flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-accent/40"
+      className="group flex flex-col gap-3 rounded-2xl border bg-card p-4 transition-colors hover:border-primary/40 hover:bg-accent/10 dark:hover:bg-accent/15"
     >
       <div className="space-y-1.5">
         <div className="flex items-start justify-between gap-2">

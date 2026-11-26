@@ -45,7 +45,7 @@ export function HowItWorks() {
                 </span>
                 <span
                   aria-hidden="true"
-                  className="font-display text-3xl font-semibold text-primary/30"
+                  className="font-display text-3xl font-semibold text-primary/60"
                 >
                   {String(index + 1).padStart(2, "0")}
                 </span>

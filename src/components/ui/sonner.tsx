@@ -11,11 +11,11 @@ import {
 } from "lucide-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme();
+  const { resolvedTheme = "system" } = useTheme();
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={resolvedTheme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
@@ -29,6 +29,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--success-bg": "var(--card)",
+          "--success-text": "var(--foreground)",
+          "--success-border": "var(--border)",
+          "--info-bg": "var(--card)",
+          "--info-text": "var(--foreground)",
+          "--info-border": "var(--border)",
+          "--warning-bg": "var(--card)",
+          "--warning-text": "var(--foreground)",
+          "--warning-border": "var(--border)",
+          "--error-bg": "var(--card)",
+          "--error-text": "var(--foreground)",
+          "--error-border": "var(--border)",
           "--border-radius": "var(--radius)",
         } as React.CSSProperties
       }

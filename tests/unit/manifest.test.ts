@@ -12,7 +12,7 @@ describe("PWA manifest", () => {
     expect(result.scope).toBe("/");
     expect(result.display).toBe("standalone");
     expect(result.background_color).toBe("#faf4e8");
-    expect(result.theme_color).toBe("#faf4e8");
+    expect(result.theme_color).toBe("#1f4d3a");
     expect(result.prefer_related_applications).toBe(false);
   });
 

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 
 import { OfflineBanner } from "@/components/common/offline-banner";
+import { ThemeColorSync } from "@/components/providers/theme-color-sync";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 import "./globals.css";
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ThemeProvider>
+          <ThemeColorSync />
           <SerwistProvider
             swUrl="/sw.js"
             disable={process.env.NODE_ENV === "development"}
