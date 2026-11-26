@@ -1,10 +1,4 @@
-"use client";
-
-import { useId } from "react";
-import { motion } from "framer-motion";
-
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { motionTokens, revealTransition } from "@/lib/motion";
+import { motionTokens } from "@/lib/motion";
 
 const ARC_RADIUS = 78;
 
@@ -23,15 +17,11 @@ export function FuelGauge({
   label: string;
   className?: string;
 }) {
-  const reduceMotion = useReducedMotion();
-  const gradientId = useId();
   const ratio = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0;
   const overBudget = max > 0 && value > max;
   const durationMs = Math.round(motionTokens.duration.base * 1000);
-  const arcTransition = {
-    ...revealTransition,
-    duration: reduceMotion ? 0 : motionTokens.duration.base,
-  };
+  const gradientId = `gauge-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+  const path = `M ${100 - ARC_RADIUS} 100 A ${ARC_RADIUS} ${ARC_RADIUS} 0 0 1 ${100 + ARC_RADIUS} 100`;
 
   return (
     <div className={className}>
@@ -52,36 +42,31 @@ export function FuelGauge({
           </linearGradient>
         </defs>
 
-        {/* Track */}
-        <path
-          d={`M ${100 - ARC_RADIUS} 100 A ${ARC_RADIUS} ${ARC_RADIUS} 0 0 1 ${100 + ARC_RADIUS} 100`}
-          fill="none"
-          stroke="var(--border)"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
+        <path d={path} fill="none" stroke="var(--border)" strokeWidth="10" strokeLinecap="round" />
 
-        {/* Filled portion, drawn by normalised path length. */}
-        <motion.path
-          d={`M ${100 - ARC_RADIUS} 100 A ${ARC_RADIUS} ${ARC_RADIUS} 0 0 1 ${100 + ARC_RADIUS} 100`}
+        <path
+          className="motion-gauge-fill"
+          d={path}
           fill="none"
           stroke={`url(#${gradientId})`}
           strokeWidth="10"
           strokeLinecap="round"
-          initial={reduceMotion ? false : { pathLength: 0 }}
-          animate={{ pathLength: ratio }}
-          transition={arcTransition}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={1 - ratio}
+          style={
+            {
+              "--gauge-target": 1 - ratio,
+              "--gauge-duration": `${durationMs}ms`,
+            } as React.CSSProperties
+          }
         />
 
-        {/* Needle */}
         <g
           style={{
             transformOrigin: "100px 100px",
             transformBox: "view-box",
             transform: `rotate(${-90 + ratio * 180}deg)`,
-            transition: reduceMotion
-              ? "none"
-              : `transform ${durationMs}ms cubic-bezier(${motionTokens.ease.join(", ")})`,
           }}
         >
           <line x1="100" y1="100" x2="100" y2="36" stroke="var(--foreground)" strokeWidth="2.5" />

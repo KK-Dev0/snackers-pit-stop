@@ -21,8 +21,9 @@ describe("polish states", () => {
     expect(source("src/app/global-error.tsx")).toContain("<html");
   });
 
-  it("mounts the toaster and uses it for async feedback", () => {
-    expect(source("src/app/layout.tsx")).toContain("<Toaster");
+  it("mounts the toaster on toast-using routes and uses it for async feedback", () => {
+    expect(source("src/app/(app)/layout.tsx")).toContain("<Toaster");
+    expect(source("src/app/onboarding/page.tsx")).toContain("<Toaster");
     for (const file of [
       "src/app/(app)/plan/page.tsx",
       "src/app/(app)/me/page.tsx",

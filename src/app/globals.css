@@ -191,6 +191,54 @@
   --stagger-index: 6;
 }
 
+/* Landing-only reveals: CSS keyframes and one tiny observer, no animation runtime. */
+@keyframes landing-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.motion-landing-reveal {
+  animation: landing-reveal 450ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+@supports (animation-timeline: view()) {
+  @keyframes scroll-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(var(--reveal-distance, 16px));
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .motion-scroll-reveal {
+    animation: scroll-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+}
+
+@keyframes gauge-fill {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: var(--gauge-target, 0);
+  }
+}
+
+.motion-gauge-fill {
+  animation: gauge-fill var(--gauge-duration, 320ms) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @keyframes flag-sway {
   0%,
   100% {

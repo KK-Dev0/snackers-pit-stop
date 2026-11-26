@@ -1,12 +1,11 @@
-"use client";
-
-import { motion } from "framer-motion";
+import { cn } from "cn";
 
 import { motionTokens } from "@/lib/motion";
 
 /**
- * Reveals content once it scrolls into view. Landing-page only: app screens
- * use `PageReveal` and stay under 400 ms.
+ * Reveals content once as it scrolls into view. The browser drives the animation
+ * through `animation-timeline`, so the landing route needs no observer or
+ * animation library; unsupported browsers simply show the content.
  */
 export function ScrollReveal({
   children,
@@ -20,18 +19,17 @@ export function ScrollReveal({
   distance?: number;
 }) {
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: distance }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-10% 0px" }}
-      transition={{
-        duration: motionTokens.duration.landing,
-        ease: [...motionTokens.ease],
-        delay,
-      }}
+    <div
+      className={cn("motion-scroll-reveal", className)}
+      style={
+        {
+          "--reveal-distance": `${distance}px`,
+          "--reveal-delay": `${Math.round(delay * 1000)}ms`,
+          "--reveal-duration": `${Math.round(motionTokens.duration.landing * 1000)}ms`,
+        } as React.CSSProperties
+      }
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

@@ -1,27 +1,36 @@
-"use client";
-
-import { useTheme } from "next-themes";
-import { useEffect } from "react";
-
-const THEME_COLORS = {
-  light: "#faf4e8",
-  dark: "#121713",
-} as const;
-
-/**
- * The static viewport export only follows the OS preference. This keeps the
- * browser chrome in step with an explicit in-app theme choice too.
- */
-export function ThemeColorSync() {
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    if (resolvedTheme !== "light" && resolvedTheme !== "dark") return;
-    const color = THEME_COLORS[resolvedTheme];
-    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+const THEME_SCRIPT = `
+(() => {
+  const key = 'snackers-theme';
+  const colors = { light: '#faf4e8', dark: '#121713' };
+  const apply = (value) => {
+    const dark = value === 'dark' || (value === 'system' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', dark);
+    const color = colors[dark ? 'dark' : 'light'];
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
       meta.content = color;
     });
-  }, [resolvedTheme]);
+    document.querySelectorAll('[data-theme-choice]').forEach((item) => {
+      item.setAttribute('aria-checked', String(item.dataset.themeChoice === value));
+    });
+  };
+  const read = () => {
+    try { return localStorage.getItem(key) || 'system'; } catch { return 'system'; }
+  };
+  apply(read());
+  window.addEventListener('storage', (event) => {
+    if (event.key === key) apply(event.newValue || 'system');
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+    if (read() === 'system') apply('system');
+  });
+})();
+`;
 
-  return null;
+/**
+ * Applies the saved theme before paint with a tiny inline script. Keeping this
+ * out of React means the public landing page ships no client runtime.
+ */
+export function ThemeColorSync() {
+  return <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />;
 }

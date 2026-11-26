@@ -1,5 +1,3 @@
-"use client";
-
 import { FuelGauge } from "@/components/common/fuel-gauge";
 import { CheckeredFlag } from "@/components/landing/checkered-flag";
 

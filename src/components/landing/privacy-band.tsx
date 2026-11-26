@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowRightIcon, DownloadIcon, ShieldCheckIcon, SparklesIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,8 @@ const PROMISES = [
   {
     icon: DownloadIcon,
     title: "Yours to take",
-    description: "Export your data as JSON, import it on another device, or clear it all in one tap.",
+    description:
+      "Export your data as JSON, import it on another device, or clear it all in one tap.",
   },
 ];
 
@@ -43,19 +43,16 @@ export function PrivacyBand() {
                 size="lg"
                 className="mt-6 h-11 bg-accent-foreground px-5 text-base text-accent hover:bg-accent-foreground/90"
               >
-                <Link href="/onboarding">
+                <a href="/onboarding">
                   Start planning
                   <ArrowRightIcon aria-hidden="true" />
-                </Link>
+                </a>
               </Button>
             </div>
 
             <ul className="grid gap-3">
               {PROMISES.map(({ icon: Icon, title, description }) => (
-                <li
-                  key={title}
-                  className="flex gap-3 rounded-2xl bg-accent-foreground/10 p-4 backdrop-blur-[1px]"
-                >
+                <li key={title} className="flex gap-3 rounded-2xl bg-accent-foreground/10 p-4">
                   <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent-foreground/15">
                     <Icon aria-hidden="true" className="size-4.5" />
                   </span>

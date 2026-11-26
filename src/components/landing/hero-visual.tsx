@@ -20,6 +20,19 @@ function canRenderScene() {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   if (sceneCapability !== undefined) return sceneCapability;
 
+  // WebGL is a desktop enhancement. Check the cheap gates before creating a
+  // canvas so phones never pay for a context probe on the critical path.
+  const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  const cores = navigator.hardwareConcurrency ?? 8;
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+  const saveData = connection?.saveData === true;
+
+  if (!desktop || saveData || cores < 4 || memory <= 2) {
+    sceneCapability = false;
+    return sceneCapability;
+  }
+
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
@@ -34,13 +47,7 @@ function canRenderScene() {
     return sceneCapability;
   }
 
-  const cores = navigator.hardwareConcurrency ?? 8;
-  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  // WebGL is a desktop enhancement. Phones and tablets keep the SVG poster,
-  // which removes three.js from the mobile critical path entirely.
-  const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
-  sceneCapability = desktop && connection?.saveData !== true && cores >= 4 && memory > 2;
+  sceneCapability = connection?.saveData !== true && cores >= 4 && memory > 2;
   return sceneCapability;
 }
 

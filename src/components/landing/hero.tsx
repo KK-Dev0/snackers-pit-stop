@@ -1,36 +1,28 @@
-"use client";
-
-import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CheckeredFlag } from "@/components/landing/checkered-flag";
-import { HeroVisual } from "@/components/landing/hero-visual";
+import { HeroPoster } from "@/components/landing/hero-poster";
 import { PitBoard } from "@/components/landing/pit-board";
 import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { motionTokens } from "@/lib/motion";
 
 const TRUST_POINTS = ["Free forever", "No account", "Stays on your device"];
+const RECIPES_HREF = "/recipes";
 
 export function Hero() {
-  const reduceMotion = useReducedMotion();
-
   return (
     <section className="relative overflow-hidden">
       {/* Soft saffron wash behind the pit board. Decorative only. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-24 right-[-15%] size-[34rem] rounded-full bg-primary/10 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-[-15%] hidden size-[34rem] rounded-full bg-primary/10 blur-3xl sm:block"
       />
 
       <div className="relative mx-auto grid w-full max-w-5xl gap-12 px-5 pt-8 pb-14 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:pt-16 lg:pb-24">
         <StaggerList className="max-w-xl">
           <StaggerItem>
             <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase shadow-soft">
-              <CheckeredFlag className="scale-75" />
-              A pit stop for hungry people
+              <CheckeredFlag className="scale-75" />A pit stop for hungry people
             </p>
           </StaggerItem>
 
@@ -44,21 +36,21 @@ export function Hero() {
 
           <StaggerItem>
             <p className="mt-5 max-w-lg text-lg text-pretty text-muted-foreground">
-              Seven days of meals built around your diet, calorie goal, budget and pantry — then
-              one merged list, ready to hand off to the shops you already use.
+              Seven days of meals built around your diet, calorie goal, budget and pantry — then one
+              merged list, ready to hand off to the shops you already use.
             </p>
           </StaggerItem>
 
           <StaggerItem>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="h-11 px-5 text-base">
-                <Link href="/onboarding">
+                <a href="/onboarding">
                   Plan my week
                   <ArrowRightIcon aria-hidden="true" />
-                </Link>
+                </a>
               </Button>
               <Button asChild variant="outline" size="lg" className="h-11 px-5 text-base">
-                <Link href="/recipes">Browse recipes</Link>
+                <a href={RECIPES_HREF}>Browse recipes</a>
               </Button>
             </div>
           </StaggerItem>
@@ -75,14 +67,9 @@ export function Hero() {
           </StaggerItem>
         </StaggerList>
 
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: motionTokens.duration.slow, ease: [...motionTokens.ease], delay: 0.12 }}
-          className="relative"
-        >
+        <div className="motion-landing-reveal relative">
           <figure className="overflow-hidden rounded-3xl border border-border bg-card shadow-lift">
-            <HeroVisual className="h-52 border-b border-border/60 sm:h-64" />
+            <HeroPoster className="h-52 border-b border-border/60 sm:h-64" />
             <PitBoard />
             <figcaption className="sr-only">
               Illustration of a weekly plan using ₹1,850 of a ₹2,500 budget.
@@ -91,7 +78,7 @@ export function Hero() {
           <p className="mt-3 text-center text-xs text-muted-foreground">
             Illustrative plan. All nutrition and costs are estimates.
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Pit-lane divider. */}

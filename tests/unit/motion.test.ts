@@ -21,7 +21,7 @@ const screensWithReveals = [
 
 describe("motion", () => {
   it("honours reduced motion globally without forking SSR markup", () => {
-    expect(source("src/app/layout.tsx")).toContain('<MotionConfig reducedMotion="user">');
+    expect(source("src/app/globals.css")).toContain("prefers-reduced-motion: reduce");
     for (const file of motionWrappers) {
       const markup = source(file);
       expect(markup).not.toContain("if (reduceMotion)");

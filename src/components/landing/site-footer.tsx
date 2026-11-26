@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Wordmark } from "@/components/layout/wordmark";
 
 const APP_LINKS = [
@@ -29,12 +27,12 @@ export function SiteFooter() {
             <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-1">
               {APP_LINKS.map(({ href, label }) => (
                 <li key={href}>
-                  <Link
+                  <a
                     href={href}
                     className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                   >
                     {label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
@@ -46,12 +44,12 @@ export function SiteFooter() {
             </h2>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link
+                <a
                   href="/about"
                   className="font-medium text-foreground underline-offset-4 hover:underline"
                 >
                   About &amp; disclaimers
-                </Link>
+                </a>
               </li>
               <li>Nutrition and prices are estimates, not medical advice.</li>
               <li>Allergen filtering is best-effort — always check labels.</li>

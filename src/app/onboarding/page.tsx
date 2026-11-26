@@ -14,6 +14,7 @@ import { ErrorState } from "@/components/common/error-state";
 import { StoreListSkeleton } from "@/components/common/states";
 import { PincodeField } from "@/components/stores/pincode-field";
 import { StorePicker } from "@/components/stores/store-picker";
+import { Toaster } from "@/components/ui/sonner";
 import { isPincode } from "@/lib/geo";
 import type { Profile } from "@/lib/schemas";
 
@@ -108,6 +109,7 @@ export default function OnboardingPage() {
 
   return (
     <main id="main-content" className="mx-auto max-w-md px-4 py-8">
+      <Toaster position="bottom-right" closeButton />
       <div className="mb-6">
         <Progress
           value={((step + 1) / STEPS.length) * 100}

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Wordmark } from "@/components/layout/wordmark";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -12,7 +10,7 @@ export function SiteHeader() {
       <div className="flex items-center gap-1.5">
         <ThemeToggle />
         <Button asChild variant="outline" size="lg" className="hidden sm:inline-flex">
-          <Link href="/onboarding">Get started</Link>
+          <a href="/onboarding">Get started</a>
         </Button>
       </div>
     </header>

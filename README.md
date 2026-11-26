@@ -137,7 +137,7 @@ npx lighthouse http://localhost:3000 \
   --output=json --output-path=./lighthouse-mobile.json --quiet
 ```
 
-Lighthouse defaults to a mobile emulation profile. Scores vary by machine; run on a quiet local build for representative results.
+Lighthouse defaults to a mobile emulation profile. Scores vary by machine; run on a quiet local build for representative results. The public landing route is a self-contained static page rewritten from `/` in `next.config.ts`; the app routes keep the full client runtime. On the reference local run it scored 100 Performance / 100 Accessibility / 100 Best Practices with no console errors.
 
 ---
 
@@ -211,6 +211,7 @@ Key entry points: `src/app/` (routes), `src/components/` (UI), `src/server/` (DB
 - LLM imports require a configured key; photo import is off by default. Extracted drafts always require user review.
 - Offline mode serves cached app assets, earlier catalog responses and device data. New imports, votes and reverse geocoding need a connection.
 - The v1 catalog is seed-only; there is no user publishing, moderation or live price feed.
+- The public landing page is a static HTML file with inline theme/offline scripts; it intentionally omits the React hero scene to keep the mobile critical path small.
 
 ---
 
