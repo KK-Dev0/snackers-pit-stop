@@ -29,6 +29,19 @@ describe("motion", () => {
     expect(source("src/hooks/use-reduced-motion.ts")).toContain("useMounted()");
   });
 
+  it("keeps server-rendered LCP text visible", () => {
+    for (const file of [
+      "src/components/motion/page-reveal.tsx",
+      "src/components/motion/stagger-list.tsx",
+    ]) {
+      const markup = source(file);
+      expect(markup).not.toContain("framer-motion");
+      expect(markup).not.toContain("opacity: 0");
+    }
+    expect(source("src/app/globals.css")).toContain("@keyframes reveal-in");
+    expect(source("src/components/landing/checkered-flag.tsx")).toContain("flag-sway");
+  });
+
   it("keeps app-screen motion within 400 ms", () => {
     const gauge = source("src/components/common/fuel-gauge.tsx");
     expect(gauge).toContain("motionTokens.duration.base");

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -153,39 +153,52 @@ export default function PlanPage() {
       .catch(() => setStatus("Could not load recipe details. Plan estimates may be incomplete."));
   }, []);
 
-  const ingMap = new Map(ingredients.map((i) => [i.id, i]));
+  const ingMap = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients]);
+  const recipeMap = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
+  const mealBySlot = useMemo(
+    () => new Map(meals.map((m) => [`${m.dayIndex}:${m.slot}`, m])),
+    [meals],
+  );
 
-  const mealStats = (recipeId: string, mealServings: number) => {
-    const recipe = recipes.find((r) => r.id === recipeId);
-    if (!recipe) return { kcal: 0, cost: 0 };
-    const items = (recipe.ingredients ?? []).map((ri: any) => ({
-      ingredient: ri.ingredientId ? (ingMap.get(ri.ingredientId) ?? null) : null,
-      quantity: ri.quantity,
-      unit: ri.unit,
-    }));
-    const nut = recipeNutrition(items, recipe.servings);
-    const cost = recipeCost(items, recipe.servings);
-    return {
-      kcal: Math.round(nut.kcal * mealServings),
-      cost: Math.round(cost.perServing * mealServings * 100) / 100,
-    };
-  };
+  const mealStats = useCallback(
+    (recipeId: string, mealServings: number) => {
+      const recipe = recipeMap.get(recipeId);
+      if (!recipe) return { kcal: 0, cost: 0 };
+      const items = (recipe.ingredients ?? []).map((ri: any) => ({
+        ingredient: ri.ingredientId ? (ingMap.get(ri.ingredientId) ?? null) : null,
+        quantity: ri.quantity,
+        unit: ri.unit,
+      }));
+      const nut = recipeNutrition(items, recipe.servings);
+      const cost = recipeCost(items, recipe.servings);
+      return {
+        kcal: Math.round(nut.kcal * mealServings),
+        cost: Math.round(cost.perServing * mealServings * 100) / 100,
+      };
+    },
+    [recipeMap, ingMap],
+  );
 
-  const dayStats = (dayIndex: number) => {
-    const dayMeals = meals.filter((m) => m.dayIndex === dayIndex);
-    return dayMeals.reduce(
-      (acc, m) => {
-        const s = mealStats(m.recipeId, m.servings);
-        return { kcal: acc.kcal + s.kcal, cost: acc.cost + s.cost };
-      },
-      { kcal: 0, cost: 0 },
-    );
-  };
+  const daySummaries = useMemo(
+    () =>
+      DAYS.map((_, dayIndex) =>
+        meals
+          .filter((m) => m.dayIndex === dayIndex)
+          .reduce(
+            (acc, m) => {
+              const s = mealStats(m.recipeId, m.servings);
+              return { kcal: acc.kcal + s.kcal, cost: acc.cost + s.cost };
+            },
+            { kcal: 0, cost: 0 },
+          ),
+      ),
+    [meals, mealStats],
+  );
 
-  const weeklyCost = meals.reduce((acc, m) => {
-    const s = mealStats(m.recipeId, m.servings);
-    return acc + s.cost;
-  }, 0);
+  const weeklyCost = useMemo(
+    () => meals.reduce((acc, m) => acc + mealStats(m.recipeId, m.servings).cost, 0),
+    [meals, mealStats],
+  );
 
   const generate = async () => {
     if (!profile) return;
@@ -344,15 +357,19 @@ export default function PlanPage() {
     }
   };
 
-  const alternatives = swapTarget
-    ? eligibleRecipes(
-        recipes,
-        swapTarget.slot,
-        profile?.diet,
-        [...(profile?.allergens ?? [])],
-        [...(profile?.dislikes ?? [])],
-      ).slice(0, 8)
-    : [];
+  const alternatives = useMemo(
+    () =>
+      swapTarget
+        ? eligibleRecipes(
+            recipes,
+            swapTarget.slot,
+            profile?.diet,
+            [...(profile?.allergens ?? [])],
+            [...(profile?.dislikes ?? [])],
+          ).slice(0, 8)
+        : [],
+    [swapTarget, recipes, profile?.diet, profile?.allergens, profile?.dislikes],
+  );
 
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
@@ -472,15 +489,15 @@ export default function PlanPage() {
                   <div key={day} className="rounded-lg border bg-card p-3">
                     <h2 className="font-semibold">{day}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
+                      {daySummaries[dayIndex]?.kcal ?? 0} kcal · ₹
+                      {(daySummaries[dayIndex]?.cost ?? 0).toFixed(0)}
                     </p>
                     <div className="mt-2 space-y-2">
                       {SLOTS.map((slot) => {
-                        const meal = meals.find((m) => m.dayIndex === dayIndex && m.slot === slot);
+                        const meal = mealBySlot.get(`${dayIndex}:${slot}`);
                         const slotLabel = `${day} ${slot}`;
                         const recipeTitle =
-                          recipes.find((recipe) => recipe.id === meal?.recipeId)?.title ??
-                          meal?.recipeId;
+                          recipeMap.get(meal?.recipeId ?? "")?.title ?? meal?.recipeId;
                         return (
                           <DroppableSlot key={slot} id={`${dayIndex}:${slot}`} label={slotLabel}>
                             {meal ? (

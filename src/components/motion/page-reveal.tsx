@@ -1,12 +1,8 @@
-"use client";
-
-import { motion } from "framer-motion";
-
-import { motionTokens, revealTransition } from "@/lib/motion";
+import { cn } from "cn";
 
 /**
- * Fades and lifts a screen's content in on mount. Used at the top of each app
- * screen; the delay stays small so the interface feels immediate.
+ * Lifts a screen's content in on mount using CSS only. The server markup is
+ * visible immediately, so slow JavaScript never delays first paint.
  */
 export function PageReveal({
   children,
@@ -17,16 +13,12 @@ export function PageReveal({
   className?: string;
   delay?: number;
 }) {
-  // MotionConfig's "user" mode drops the lift for reduced-motion users while
-  // keeping the fade, and renders the same tree on server and client.
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: motionTokens.distance.reveal }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...revealTransition, delay }}
+    <div
+      className={cn("motion-reveal", className)}
+      style={delay ? { animationDelay: `${Math.round(delay * 1000)}ms` } : undefined}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

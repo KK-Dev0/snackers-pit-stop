@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { Link2Icon, RotateCcwIcon, ShieldCheckIcon } from "lucide-react";
-
-import { ImportReviewForm } from "@/components/recipes/import-review-form";
-import { PhotoImportButton } from "@/components/recipes/photo-import-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RecipeDraftSchema, type RecipeDraft } from "@/lib/schemas";
+
+const ImportReviewForm = dynamic(
+  () => import("@/components/recipes/import-review-form").then((m) => m.ImportReviewForm),
+  { ssr: false, loading: () => <Skeleton className="h-72 w-full rounded-xl" /> },
+);
+
+const PhotoImportButton = dynamic(
+  () => import("@/components/recipes/photo-import-button").then((m) => m.PhotoImportButton),
+  { ssr: false, loading: () => <Skeleton className="h-10 w-32 rounded-lg" /> },
+);
 
 type SourceType = "url" | "photo" | "llm";
 type Pending = { kind: "url"; url: string } | { kind: "photo" } | null;
@@ -98,7 +106,10 @@ export function ImportPanel({ photoEnabled }: { photoEnabled: boolean }) {
   };
 
   return (
-    <section aria-labelledby="import-heading" className="space-y-4 rounded-2xl border bg-card/60 p-5">
+    <section
+      aria-labelledby="import-heading"
+      className="space-y-4 rounded-2xl border bg-card/60 p-5"
+    >
       <div className="space-y-1">
         <h2 id="import-heading" className="font-display text-xl font-semibold">
           Import a recipe
@@ -153,7 +164,10 @@ export function ImportPanel({ photoEnabled }: { photoEnabled: boolean }) {
       ) : null}
 
       {error ? (
-        <div role="alert" className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3">
+        <div
+          role="alert"
+          className="space-y-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3"
+        >
           <p className="text-sm text-destructive">{error}</p>
           {pending ? (
             <Button type="button" variant="outline" size="sm" onClick={retry}>

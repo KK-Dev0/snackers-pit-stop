@@ -36,7 +36,11 @@ function canRenderScene() {
 
   const cores = navigator.hardwareConcurrency ?? 8;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
-  sceneCapability = cores >= 4 && memory > 2;
+  const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+  // WebGL is a desktop enhancement. Phones and tablets keep the SVG poster,
+  // which removes three.js from the mobile critical path entirely.
+  const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+  sceneCapability = desktop && connection?.saveData !== true && cores >= 4 && memory > 2;
   return sceneCapability;
 }
 

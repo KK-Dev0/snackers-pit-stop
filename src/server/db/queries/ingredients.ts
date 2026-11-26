@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 import { getDb } from "../client";
 import * as schema from "../schema";
@@ -10,18 +10,13 @@ export async function listIngredients(db: Db = getDb()) {
 }
 
 export async function getIngredientById(id: string, db: Db = getDb()) {
-  const rows = await db
-    .select()
-    .from(schema.ingredients)
-    .where(eq(schema.ingredients.id, id));
+  const rows = await db.select().from(schema.ingredients).where(eq(schema.ingredients.id, id));
   return rows[0] ?? null;
 }
 
 export async function getIngredientsByIds(ids: string[], db: Db = getDb()) {
   if (ids.length === 0) return [];
-  const all = await listIngredients(db);
-  const set = new Set(ids);
-  return all.filter((i) => set.has(i.id));
+  return db.select().from(schema.ingredients).where(inArray(schema.ingredients.id, ids));
 }
 
 export async function findIngredientByName(name: string, db: Db = getDb()) {

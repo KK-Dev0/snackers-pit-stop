@@ -112,13 +112,100 @@
 /* The checkered-flag motif, used at small sizes only. */
 @utility checkered-flag {
   background-image:
-    linear-gradient(45deg, var(--foreground) 25%, transparent 25%, transparent 75%, var(--foreground) 75%),
-    linear-gradient(45deg, var(--foreground) 25%, transparent 25%, transparent 75%, var(--foreground) 75%);
+    linear-gradient(
+      45deg,
+      var(--foreground) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--foreground) 75%
+    ),
+    linear-gradient(
+      45deg,
+      var(--foreground) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--foreground) 75%
+    );
   background-size: 8px 8px;
   background-position:
     0 0,
     4px 4px;
   background-color: var(--background);
+}
+
+/*
+ * Reveal animations are CSS-only on content that can be the LCP element. The
+ * first frame is fully visible in the server HTML, so no hydration step can
+ * hide the heading while JavaScript loads.
+ */
+@keyframes reveal-in {
+  from {
+    transform: translateY(6px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes stagger-in {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.motion-reveal,
+.motion-stagger-item {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-fill-mode: both;
+}
+
+.motion-reveal {
+  animation-name: reveal-in;
+}
+
+.motion-stagger-item {
+  animation-name: stagger-in;
+  animation-delay: calc((var(--stagger-index, 1) - 1) * var(--stagger-step, 60ms));
+}
+
+.motion-stagger-list > :nth-child(1) {
+  --stagger-index: 1;
+}
+.motion-stagger-list > :nth-child(2) {
+  --stagger-index: 2;
+}
+.motion-stagger-list > :nth-child(3) {
+  --stagger-index: 3;
+}
+.motion-stagger-list > :nth-child(4) {
+  --stagger-index: 4;
+}
+.motion-stagger-list > :nth-child(5) {
+  --stagger-index: 5;
+}
+.motion-stagger-list > :nth-child(6) {
+  --stagger-index: 6;
+}
+
+@keyframes flag-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(1.5deg);
+  }
+}
+
+.flag-sway {
+  animation: flag-sway 5s ease-in-out infinite;
 }
 
 @layer base {

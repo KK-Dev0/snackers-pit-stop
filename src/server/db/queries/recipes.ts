@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 import { getDb } from "../client";
@@ -11,10 +11,7 @@ export async function listRecipes(db: Db = getDb()) {
 }
 
 export async function getRecipeBySlug(slug: string, db: Db = getDb()) {
-  const rows = await db
-    .select()
-    .from(schema.recipes)
-    .where(eq(schema.recipes.slug, slug));
+  const rows = await db.select().from(schema.recipes).where(eq(schema.recipes.slug, slug));
   const recipe = rows[0];
   if (!recipe) return null;
   const ingredients = await db
@@ -25,10 +22,7 @@ export async function getRecipeBySlug(slug: string, db: Db = getDb()) {
 }
 
 export async function getRecipeById(id: string, db: Db = getDb()) {
-  const rows = await db
-    .select()
-    .from(schema.recipes)
-    .where(eq(schema.recipes.id, id));
+  const rows = await db.select().from(schema.recipes).where(eq(schema.recipes.id, id));
   const recipe = rows[0];
   if (!recipe) return null;
   const ingredients = await db
@@ -61,13 +55,27 @@ export async function searchRecipesFts(query: string, db: Db = getDb()) {
   }
 }
 
-// Helper used by retrieval: fetch recipes with ingredients in one go.
+/** Fetch the whole catalog with one ingredients query instead of N+1 lookups. */
 export async function listRecipesWithIngredients(db: Db = getDb()) {
   const recipes = await listRecipes(db);
-  const result = [];
-  for (const r of recipes) {
-    const ingredients = await listRecipeIngredients(r.id, db);
-    result.push({ ...r, ingredients });
+  if (recipes.length === 0) return [];
+
+  const rows = await db
+    .select()
+    .from(schema.recipeIngredients)
+    .where(
+      inArray(
+        schema.recipeIngredients.recipeId,
+        recipes.map((recipe) => recipe.id),
+      ),
+    );
+
+  const byRecipe = new Map<string, (typeof rows)[number][]>();
+  for (const row of rows) {
+    const list = byRecipe.get(row.recipeId) ?? [];
+    list.push(row);
+    byRecipe.set(row.recipeId, list);
   }
-  return result;
+
+  return recipes.map((recipe) => ({ ...recipe, ingredients: byRecipe.get(recipe.id) ?? [] }));
 }

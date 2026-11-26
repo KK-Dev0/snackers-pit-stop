@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTheme } from "next-themes";
-import * as THREE from "three";
+import { CanvasTexture, DoubleSide, SRGBColorSpace, type Group, type Mesh } from "three";
 
 type SceneColors = {
   body: string;
@@ -49,8 +49,8 @@ function useFlagTexture(colors: SceneColors) {
         }
       }
     }
-    const next = new THREE.CanvasTexture(canvas);
-    next.colorSpace = THREE.SRGBColorSpace;
+    const next = new CanvasTexture(canvas);
+    next.colorSpace = SRGBColorSpace;
     return next;
   }, [colors.neutral, colors.screen]);
 
@@ -61,8 +61,8 @@ function useFlagTexture(colors: SceneColors) {
 
 /** Low-poly fuel pump, flag and snack crate. About ten simple meshes. */
 function PitStopModel({ colors }: { colors: SceneColors }) {
-  const group = useRef<THREE.Group>(null);
-  const flag = useRef<THREE.Mesh>(null);
+  const group = useRef<Group>(null);
+  const flag = useRef<Mesh>(null);
   const flagTexture = useFlagTexture(colors);
 
   useFrame((state) => {
@@ -127,7 +127,7 @@ function PitStopModel({ colors }: { colors: SceneColors }) {
       </mesh>
       <mesh ref={flag} position={[-0.76, 1.62, -0.1]}>
         <planeGeometry args={[0.42, 0.3]} />
-        <meshStandardMaterial map={flagTexture} side={THREE.DoubleSide} roughness={0.8} />
+        <meshStandardMaterial map={flagTexture} side={DoubleSide} roughness={0.8} />
       </mesh>
 
       {/* Snack crate */}
@@ -143,13 +143,7 @@ function PitStopModel({ colors }: { colors: SceneColors }) {
   );
 }
 
-export function HeroScene({
-  active,
-  className,
-}: {
-  active: boolean;
-  className?: string;
-}) {
+export function HeroScene({ active, className }: { active: boolean; className?: string }) {
   const { resolvedTheme } = useTheme();
   const colors = resolvedTheme === "dark" ? DARK : LIGHT;
 

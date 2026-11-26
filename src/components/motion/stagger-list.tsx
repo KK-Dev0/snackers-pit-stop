@@ -1,39 +1,25 @@
-"use client";
-
-import { motion, type Variants } from "framer-motion";
-
-import { motionTokens, revealTransition } from "@/lib/motion";
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: motionTokens.distance.reveal },
-  visible: { opacity: 1, y: 0, transition: revealTransition },
-};
+import { cn } from "cn";
 
 /**
- * Reveals children one after another with a 40 ms gap. Wrap each child in
- * `StaggerItem`; children outside the list still render, just unanimated.
+ * CSS-driven stagger for the landing hero. The first paint is visible; only a
+ * small transform runs afterwards, and reduced motion is handled globally.
  */
 export function StaggerList({
   children,
   className,
-  stagger = motionTokens.stagger.base,
+  stagger = 0.06,
 }: {
   children: React.ReactNode;
   className?: string;
   stagger?: number;
 }) {
   return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      animate="visible"
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: stagger } },
-      }}
+    <div
+      className={cn("motion-stagger-list", className)}
+      style={{ "--stagger-step": `${Math.round(stagger * 1000)}ms` } as React.CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -44,9 +30,5 @@ export function StaggerItem({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <motion.div className={className} variants={itemVariants}>
-      {children}
-    </motion.div>
-  );
+  return <div className={cn("motion-stagger-item", className)}>{children}</div>;
 }

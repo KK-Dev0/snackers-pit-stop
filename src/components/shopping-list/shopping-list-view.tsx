@@ -190,20 +190,25 @@ export function ShoppingListView() {
     return map;
   }, [catalog, localRecipes]);
 
+  // The React compiler memoizes this pure derivation; a manual useMemo around
+  // the live Dexie `meals` array cannot be preserved safely.
   const generated = planId
     ? buildList(planId, meals, recipeMap, ingredients, pantry, includeStaples)
     : null;
 
-  const parsedCustom = ShoppingItemSchema.array().safeParse(listState?.customItems ?? []);
-  const customItems = parsedCustom.success ? parsedCustom.data : [];
+  const customItems = useMemo(() => {
+    const parsed = ShoppingItemSchema.array().safeParse(listState?.customItems ?? []);
+    return parsed.success ? parsed.data : [];
+  }, [listState?.customItems]);
 
-  const removed = new Set(listState?.removedKeys ?? []);
-  const checked = new Set(listState?.checkedKeys ?? []);
-  const items: ShoppingItem[] = generated
-    ? [...generated.items, ...customItems]
-        .filter((item) => !removed.has(item.key))
-        .map((item) => ({ ...item, checked: checked.has(item.key) }))
-    : [];
+  const items: ShoppingItem[] = useMemo(() => {
+    if (!generated) return [];
+    const removed = new Set(listState?.removedKeys ?? []);
+    const checked = new Set(listState?.checkedKeys ?? []);
+    return [...generated.items, ...customItems]
+      .filter((item) => !removed.has(item.key))
+      .map((item) => ({ ...item, checked: checked.has(item.key) }));
+  }, [generated, customItems, listState?.removedKeys, listState?.checkedKeys]);
 
   const updateState = (patch: Partial<ShoppingListStateRecord>) => {
     if (!activePlan || !listState) return;
@@ -212,8 +217,18 @@ export function ShoppingListView() {
     void saveShoppingListState(next);
   };
 
-  const totalCost = items.reduce((sum, item) => sum + (item.estimatedCostInr ?? 0), 0);
-  const checkedCount = items.filter((item) => item.checked).length;
+  const { totalCost, checkedCount } = useMemo(
+    () => ({
+      totalCost: items.reduce((sum, item) => sum + (item.estimatedCostInr ?? 0), 0),
+      checkedCount: items.filter((item) => item.checked).length,
+    }),
+    [items],
+  );
+
+  const headerQuery = useMemo(
+    () => listSearchQuery(items, listState?.itemOrder),
+    [items, listState?.itemOrder],
+  );
 
   const share = async () => {
     const result = await shareText(
@@ -309,7 +324,7 @@ export function ShoppingListView() {
                   <div className="flex flex-wrap items-center gap-2">
                     <StoreHandoff
                       stores={handoffStores}
-                      query={listSearchQuery(items, listState?.itemOrder)}
+                      query={headerQuery}
                       items={items}
                       savedOrder={listState?.itemOrder}
                     />
