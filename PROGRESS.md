@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 109 of 111 complete · **Current:** M8 in progress — next is task 110.
+**Status:** 110 of 111 complete · **Current:** M7 in progress — next is task 111.
 
 ## How to use
 
@@ -137,5 +137,5 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 107. **Performance pass.** Font/image optimization, bundle trimming, route-level code splitting, and Lighthouse 90+ on mobile.
 - [x] 108. **Polish states.** Consistent skeletons, empty states, error boundaries, toasts, and retry actions.
 - [x] 109. **Add the Playwright smoke test.** Onboarding → generate plan → shopping list against a seeded local DB.
-- [ ] 110. **Write the README.** Setup, env vars, Vercel + Turso deploy, assumptions, limitations, disclaimers, and roadmap.
+- [x] 110. **Write the README.** Setup, env vars, Vercel + Turso deploy, assumptions, limitations, disclaimers, and roadmap.
 - [ ] 111. **Final gate.** Lint, typecheck, all tests, build, Lighthouse and smoke test; commit `chore: polish, tests, PWA, and docs`.
