@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
+import { RecipeCardGridSkeleton } from "@/components/common/states";
 import { RecipeCard } from "@/components/recipes/recipe-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   AllergenSchema,
   DietTypeSchema,
@@ -88,6 +88,14 @@ export function RecipeBrowser() {
         ? previous.filter((value) => value !== allergen)
         : [...previous, allergen],
     );
+  };
+
+  const clearFilters = () => {
+    setLoading(true);
+    setQuery("");
+    setDiet("all");
+    setExcluded([]);
+    setSort("recent");
   };
 
   return (
@@ -200,16 +208,17 @@ export function RecipeBrowser() {
           />
         </div>
       ) : loading && items.length === 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-40 w-full rounded-2xl" />
-          ))}
-        </div>
+        <RecipeCardGridSkeleton />
       ) : items.length === 0 ? (
         <EmptyState
           icon={SearchIcon}
           title="No recipes match"
           description="Try a different search or clear a filter to see more recipes."
+          action={
+            <Button type="button" variant="outline" onClick={clearFilters}>
+              Clear filters
+            </Button>
+          }
         />
       ) : (
         <>
@@ -218,13 +227,7 @@ export function RecipeBrowser() {
               <RecipeCard key={recipe.slug} recipe={recipe} />
             ))}
           </div>
-          {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }, (_, index) => (
-                <Skeleton key={index} className="h-40 w-full rounded-2xl" />
-              ))}
-            </div>
-          ) : null}
+          {loading ? <RecipeCardGridSkeleton count={3} /> : null}
           {items.length < total ? (
             <div className="flex justify-center">
               <Button

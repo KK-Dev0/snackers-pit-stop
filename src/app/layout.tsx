@@ -6,6 +6,7 @@ import { DM_Sans, Fraunces } from "next/font/google";
 import { OfflineBanner } from "@/components/common/offline-banner";
 import { ThemeColorSync } from "@/components/providers/theme-color-sync";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
@@ -74,6 +75,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <ThemeProvider>
           <MotionConfig reducedMotion="user">
+            <Toaster position="bottom-right" closeButton />
             <ThemeColorSync />
             <SerwistProvider
               swUrl="/sw.js"

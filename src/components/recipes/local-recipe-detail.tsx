@@ -7,10 +7,10 @@ import { ArrowLeftIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 
 import { deleteSavedRecipe, getSavedRecipe } from "@/client/db/repos/savedRecipes";
 import { EmptyState } from "@/components/common/empty-state";
+import { RecipeDetailSkeleton } from "@/components/common/states";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { recipeCost } from "@/lib/cost";
 import { matchIngredientByName } from "@/lib/ingredient-match";
 import { recipeNutrition } from "@/lib/nutrition";
@@ -95,32 +95,20 @@ export function LocalRecipeDetail({ id }: { id: string }) {
   const matchedCount = resolved.filter((item) => item.ingredient).length;
 
   return (
-    <PageReveal
-      className={
-        loading
-          ? "mx-auto w-full max-w-3xl space-y-4 px-5 py-8 sm:px-6"
-          : "mx-auto w-full max-w-3xl space-y-6 px-5 py-8 sm:px-6"
-      }
-    >
+    <PageReveal className="mx-auto w-full max-w-3xl space-y-6 px-5 py-8 sm:px-6">
       {loading ? (
-        <>
-          <Skeleton className="h-9 w-2/3" />
-          <Skeleton className="h-4 w-1/3" />
-          <Skeleton className="h-40 w-full" />
-        </>
+        <RecipeDetailSkeleton />
       ) : missing || !recipe ? (
-        <div className="space-y-4">
-          <EmptyState
-            icon={ArrowLeftIcon}
-            title="Recipe not found"
-            description="This import is no longer on your device. It may have been deleted."
-          />
-          <div className="mt-4 text-center">
+        <EmptyState
+          icon={ArrowLeftIcon}
+          title="Recipe not found"
+          description="This import is no longer on your device. It may have been deleted."
+          action={
             <Button asChild variant="outline">
               <Link href="/recipes">Back to recipes</Link>
             </Button>
-          </div>
-        </div>
+          }
+        />
       ) : (
         <>
           <Button asChild variant="ghost" size="sm" className="-ml-2">

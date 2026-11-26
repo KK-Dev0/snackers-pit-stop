@@ -20,7 +20,7 @@ const INITIAL: StoresState = {
 };
 
 /** Server catalog plus crowdsourced availability for one pincode (optional). */
-export function useStores(pincode?: string | null): StoresState {
+export function useStores(pincode?: string | null, retryKey = 0): StoresState {
   const [state, setState] = useState<StoresState>(INITIAL);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ export function useStores(pincode?: string | null): StoresState {
       });
 
     return () => controller.abort();
-  }, [pincode]);
+  }, [pincode, retryKey]);
 
   return state;
 }

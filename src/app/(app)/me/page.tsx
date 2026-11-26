@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { UserRoundIcon } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { toast } from "sonner";
 
-import { EmptyState } from "@/components/common/empty-state";
-import { PageHeader } from "@/components/common/page-header";
-import { PageReveal } from "@/components/motion/page-reveal";
 import { useProfile } from "@/client/hooks/use-profile";
 import { getDb } from "@/client/db/dexie";
+import { EmptyState } from "@/components/common/empty-state";
+import { PageHeader } from "@/components/common/page-header";
+import { PageHeaderSkeleton } from "@/components/common/states";
+import { PageReveal } from "@/components/motion/page-reveal";
 import { Button } from "@/components/ui/button";
 
 function AboutLink() {
@@ -24,14 +26,146 @@ function AboutLink() {
   );
 }
 
+type DataAction = "export" | "import" | "clear";
+
 export default function MePage() {
   const profile = useProfile();
   const importInputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState<DataAction | null>(null);
+
+  const runDataAction = async (
+    action: DataAction,
+    labels: { loading: string; success: string; error: string },
+    work: () => Promise<void>,
+  ) => {
+    const id = toast.loading(labels.loading);
+    setBusy(action);
+    try {
+      await work();
+      toast.success(labels.success, { id });
+    } catch (error) {
+      toast.error(labels.error, {
+        id,
+        description: error instanceof Error ? error.message : "Please try again.",
+        action: {
+          label: "Retry",
+          onClick: () => void runDataAction(action, labels, work),
+        },
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const exportData = () =>
+    runDataAction(
+      "export",
+      { loading: "Preparing export…", success: "Export downloaded", error: "Export failed" },
+      async () => {
+        const db = getDb();
+        const data = {
+          profile: await db.profile.toArray(),
+          pantryItems: await db.pantryItems.toArray(),
+          plans: await db.plans.toArray(),
+          planMeals: await db.planMeals.toArray(),
+          savedRecipes: await db.savedRecipes.toArray(),
+          priceOverrides: await db.priceOverrides.toArray(),
+          shoppingListState: await db.shoppingListState.toArray(),
+          userStores: await db.userStores.toArray(),
+          settings: await db.settings.toArray(),
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = "snackers-pit-stop-export.json";
+        anchor.click();
+        URL.revokeObjectURL(url);
+      },
+    );
+
+  const importData = (file: File) =>
+    runDataAction(
+      "import",
+      { loading: "Importing data…", success: "Import complete", error: "Import failed" },
+      async () => {
+        const data: unknown = JSON.parse(await file.text());
+        if (!data || typeof data !== "object") throw new Error("The file is not a backup export.");
+        const db = getDb();
+        await db.transaction(
+          "rw",
+          [
+            db.profile,
+            db.pantryItems,
+            db.plans,
+            db.planMeals,
+            db.savedRecipes,
+            db.priceOverrides,
+            db.shoppingListState,
+            db.userStores,
+            db.settings,
+          ],
+          async () => {
+            const record = data as Record<string, unknown>;
+            await db.profile.clear();
+            await db.pantryItems.clear();
+            await db.plans.clear();
+            await db.planMeals.clear();
+            await db.savedRecipes.clear();
+            await db.priceOverrides.clear();
+            await db.shoppingListState.clear();
+            await db.userStores.clear();
+            await db.settings.clear();
+            for (const key of Object.keys(record)) {
+              const table = (
+                db as unknown as Record<string, { bulkPut: (rows: unknown[]) => Promise<unknown> }>
+              )[key];
+              if (table && Array.isArray(record[key]))
+                await table.bulkPut(record[key] as unknown[]);
+            }
+          },
+        );
+      },
+    );
+
+  const clearData = () =>
+    runDataAction(
+      "clear",
+      { loading: "Clearing data…", success: "Local data cleared", error: "Could not clear data" },
+      async () => {
+        const db = getDb();
+        await db.transaction(
+          "rw",
+          [
+            db.profile,
+            db.pantryItems,
+            db.plans,
+            db.planMeals,
+            db.savedRecipes,
+            db.priceOverrides,
+            db.shoppingListState,
+            db.userStores,
+            db.settings,
+          ],
+          async () => {
+            await db.profile.clear();
+            await db.pantryItems.clear();
+            await db.plans.clear();
+            await db.planMeals.clear();
+            await db.savedRecipes.clear();
+            await db.priceOverrides.clear();
+            await db.shoppingListState.clear();
+            await db.userStores.clear();
+            await db.settings.clear();
+          },
+        );
+      },
+    );
 
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
       {profile === undefined ? (
-        <PageHeader eyebrow="On this device" title="Me" description="Loading…" />
+        <PageHeaderSkeleton />
       ) : !profile ? (
         <>
           <PageHeader
@@ -43,10 +177,12 @@ export default function MePage() {
             icon={UserRoundIcon}
             title="No profile yet"
             description="Your onboarding answers will show up here, ready to edit whenever life changes."
+            action={
+              <Button asChild>
+                <Link href="/onboarding">Start onboarding</Link>
+              </Button>
+            }
           />
-          <Link href="/onboarding" className="text-primary underline">
-            Start onboarding
-          </Link>
           <AboutLink />
         </>
       ) : (
@@ -89,35 +225,18 @@ export default function MePage() {
 
           <div className="rounded-lg border bg-card p-6 space-y-3">
             <h2 className="font-semibold">Data</h2>
+            <p className="text-sm text-muted-foreground">
+              Export a backup, restore it on this device, or start fresh. Nothing leaves your
+              device.
+            </p>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
-                onClick={async () => {
-                  const db = getDb();
-                  const data = {
-                    profile: await db.profile.toArray(),
-                    pantryItems: await db.pantryItems.toArray(),
-                    plans: await db.plans.toArray(),
-                    planMeals: await db.planMeals.toArray(),
-                    savedRecipes: await db.savedRecipes.toArray(),
-                    priceOverrides: await db.priceOverrides.toArray(),
-                    shoppingListState: await db.shoppingListState.toArray(),
-                    userStores: await db.userStores.toArray(),
-                    settings: await db.settings.toArray(),
-                  };
-                  const blob = new Blob([JSON.stringify(data, null, 2)], {
-                    type: "application/json",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "snackers-pit-stop-export.json";
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
+                disabled={busy !== null}
+                onClick={() => void exportData()}
               >
-                Export JSON
+                {busy === "export" ? "Preparing…" : "Export JSON"}
               </Button>
               <input
                 ref={importInputRef}
@@ -126,101 +245,38 @@ export default function MePage() {
                 className="sr-only"
                 tabIndex={-1}
                 aria-hidden="true"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const text = await file.text();
-                  try {
-                    const data = JSON.parse(text);
-                    const db = getDb();
-                    await db.transaction(
-                      "rw",
-                      [
-                        db.profile,
-                        db.pantryItems,
-                        db.plans,
-                        db.planMeals,
-                        db.savedRecipes,
-                        db.priceOverrides,
-                        db.shoppingListState,
-                        db.userStores,
-                        db.settings,
-                      ],
-                      async () => {
-                        await db.profile.clear();
-                        await db.pantryItems.clear();
-                        await db.plans.clear();
-                        await db.planMeals.clear();
-                        await db.savedRecipes.clear();
-                        await db.priceOverrides.clear();
-                        await db.shoppingListState.clear();
-                        await db.userStores.clear();
-                        await db.settings.clear();
-                        if (Array.isArray(data.profile)) await db.profile.bulkPut(data.profile);
-                        if (Array.isArray(data.pantryItems))
-                          await db.pantryItems.bulkPut(data.pantryItems);
-                        if (Array.isArray(data.plans)) await db.plans.bulkPut(data.plans);
-                        if (Array.isArray(data.planMeals))
-                          await db.planMeals.bulkPut(data.planMeals);
-                        if (Array.isArray(data.savedRecipes))
-                          await db.savedRecipes.bulkPut(data.savedRecipes);
-                        if (Array.isArray(data.priceOverrides))
-                          await db.priceOverrides.bulkPut(data.priceOverrides);
-                        if (Array.isArray(data.shoppingListState))
-                          await db.shoppingListState.bulkPut(data.shoppingListState);
-                        if (Array.isArray(data.userStores))
-                          await db.userStores.bulkPut(data.userStores);
-                        if (Array.isArray(data.settings)) await db.settings.bulkPut(data.settings);
-                      },
-                    );
-                    alert("Import complete");
-                  } catch (err) {
-                    alert("Import failed: " + (err as Error).message);
+                onChange={async (event) => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (
+                    file &&
+                    window.confirm(
+                      "Import this backup? It replaces the data currently on this device.",
+                    )
+                  ) {
+                    await importData(file);
                   }
-                  e.target.value = "";
                 }}
               />
               <Button
                 type="button"
                 variant="outline"
+                disabled={busy !== null}
                 onClick={() => importInputRef.current?.click()}
               >
-                Import JSON
+                {busy === "import" ? "Importing…" : "Import JSON"}
               </Button>
               <Button
                 type="button"
                 variant="destructive"
-                onClick={async () => {
-                  if (!confirm("Clear all local data?")) return;
-                  const db = getDb();
-                  await db.transaction(
-                    "rw",
-                    [
-                      db.profile,
-                      db.pantryItems,
-                      db.plans,
-                      db.planMeals,
-                      db.savedRecipes,
-                      db.priceOverrides,
-                      db.shoppingListState,
-                      db.userStores,
-                      db.settings,
-                    ],
-                    async () => {
-                      await db.profile.clear();
-                      await db.pantryItems.clear();
-                      await db.plans.clear();
-                      await db.planMeals.clear();
-                      await db.savedRecipes.clear();
-                      await db.priceOverrides.clear();
-                      await db.shoppingListState.clear();
-                      await db.userStores.clear();
-                      await db.settings.clear();
-                    },
-                  );
+                disabled={busy !== null}
+                onClick={() => {
+                  if (window.confirm("Clear all local data? This cannot be undone.")) {
+                    void clearData();
+                  }
                 }}
               >
-                Clear all data
+                {busy === "clear" ? "Clearing…" : "Clear all data"}
               </Button>
             </div>
           </div>

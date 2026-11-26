@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { getProfile, saveProfile } from "@/client/db/repos/profile";
 import { useStores } from "@/client/hooks/use-stores";
+import { ErrorState } from "@/components/common/error-state";
+import { StoreListSkeleton } from "@/components/common/states";
 import { PincodeField } from "@/components/stores/pincode-field";
 import { StorePicker } from "@/components/stores/store-picker";
 import { isPincode } from "@/lib/geo";
@@ -31,7 +34,14 @@ export default function OnboardingPage() {
   const [pincode, setPincode] = useState("");
   const [storeIds, setStoreIds] = useState<string[]>([]);
   const [customStoreName, setCustomStoreName] = useState<string>("");
-  const { items: stores, hasAvailabilityData, loading } = useStores(pincode);
+  const [storeAttempt, setStoreAttempt] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const {
+    items: stores,
+    hasAvailabilityData,
+    loading,
+    error: storesError,
+  } = useStores(pincode, storeAttempt);
 
   // Editing an existing profile must preserve the pincode and store picks.
   const hydrated = useRef(false);
@@ -77,8 +87,20 @@ export default function OnboardingPage() {
       onboardedAt: Date.now(),
       updatedAt: Date.now(),
     };
-    await saveProfile(profile);
-    router.push("/plan");
+    if (servings < 1 || calorieGoal < 1 || weeklyBudget < 1) {
+      toast.error("Enter positive numbers for servings, calories and budget.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await saveProfile(profile);
+      toast.success("Profile saved");
+      router.push("/plan");
+    } catch {
+      toast.error("Could not save your profile. Check your connection and try again.");
+    } finally {
+      setSaving(false);
+    }
   };
   const back = () => {
     if (step > 0) setStep(step - 1);
@@ -103,11 +125,7 @@ export default function OnboardingPage() {
           <div className="mt-4 space-y-4">
             <div>
               <Label id="diet-label">Diet type</Label>
-              <div
-                role="group"
-                aria-labelledby="diet-label"
-                className="mt-2 flex flex-wrap gap-2"
-              >
+              <div role="group" aria-labelledby="diet-label" className="mt-2 flex flex-wrap gap-2">
                 {DIETS.map((d) => (
                   <Button
                     key={d}
@@ -177,11 +195,7 @@ export default function OnboardingPage() {
             </div>
             <div>
               <Label htmlFor="dislikes">Dislikes (comma separated)</Label>
-              <Input
-                id="dislikes"
-                value={dislikes}
-                onChange={(e) => setDislikes(e.target.value)}
-              />
+              <Input id="dislikes" value={dislikes} onChange={(e) => setDislikes(e.target.value)} />
             </div>
           </div>
         )}
@@ -190,10 +204,15 @@ export default function OnboardingPage() {
           <div className="mt-4 space-y-4">
             <PincodeField value={pincode} onChange={setPincode} />
             {isPincode(pincode) ? (
-              loading && stores.length === 0 ? (
-                <p aria-live="polite" className="text-sm text-muted-foreground">
-                  Loading stores…
-                </p>
+              storesError ? (
+                <ErrorState
+                  compact
+                  title="Stores could not load"
+                  description="Check your connection and try again. You can still continue without store picks."
+                  retry={() => setStoreAttempt((attempt) => attempt + 1)}
+                />
+              ) : loading && stores.length === 0 ? (
+                <StoreListSkeleton />
               ) : (
                 <StorePicker
                   pincode={pincode}
@@ -226,7 +245,9 @@ export default function OnboardingPage() {
               Back
             </Button>
           )}
-          <Button onClick={next}>{step === STEPS.length - 1 ? "Finish" : "Next"}</Button>
+          <Button onClick={next} disabled={saving}>
+            {saving ? "Saving…" : step === STEPS.length - 1 ? "Finish" : "Next"}
+          </Button>
         </div>
       </div>
     </main>

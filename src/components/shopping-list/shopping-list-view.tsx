@@ -16,11 +16,11 @@ import { ShoppingListItem } from "@/components/shopping-list/shopping-list-item"
 import { StoreHandoff } from "@/components/shopping-list/store-handoff";
 import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
+import { ShoppingListSkeleton } from "@/components/common/states";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { generateShoppingList, subtractPantryFromList } from "@/lib/shopping-list";
 import { formatShoppingListText, shareText } from "@/lib/sharing";
 import { listSearchQuery } from "@/lib/store-links";
@@ -105,6 +105,7 @@ export function ShoppingListView() {
   const [listState, setListState] = useState<ShoppingListStateRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [localError, setLocalError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const [shareMessage, setShareMessage] = useState("");
 
@@ -147,12 +148,16 @@ export function ShoppingListView() {
           return parsed.success ? [parsed.data] : [];
         }),
       )
-      .then((recipes) => active && setLocalRecipes(recipes))
-      .catch(() => undefined);
+      .then((recipes) => {
+        if (!active) return;
+        setLocalRecipes(recipes);
+        setLocalError(false);
+      })
+      .catch(() => active && setLocalError(true));
     return () => {
       active = false;
     };
-  }, []);
+  }, [retryCount]);
 
   useEffect(() => {
     if (!planId) return;
@@ -161,13 +166,14 @@ export function ShoppingListView() {
       .then((record) => {
         if (active) {
           setListState(record ?? EMPTY_STATE(planId));
+          setLocalError(false);
         }
       })
-      .catch(() => undefined);
+      .catch(() => active && setLocalError(true));
     return () => {
       active = false;
     };
-  }, [planId]);
+  }, [planId, retryCount]);
 
   const includeStaples = listState?.includeStaples ?? false;
 
@@ -284,12 +290,12 @@ export function ShoppingListView() {
             description={`Week of ${formatWeekLabel(activePlan.weekStart)} · merged from your plan, minus the pantry.`}
           />
 
-          {error ? (
+          {error || localError ? (
             <div role="alert">
               <EmptyState
                 icon={RefreshCwIcon}
                 title="Could not build the list"
-                description="The recipe catalog is unavailable right now. Please try again."
+                description="Some recipe or saved data is unavailable right now. Your list stays on this device — please try again."
                 action={
                   <Button
                     type="button"
@@ -302,10 +308,7 @@ export function ShoppingListView() {
               />
             </div>
           ) : loading || !listState || !generated ? (
-            <div className="space-y-3">
-              <Skeleton className="h-16 w-full rounded-xl" />
-              <Skeleton className="h-48 w-full rounded-xl" />
-            </div>
+            <ShoppingListSkeleton />
           ) : (
             <>
               <section aria-label="List summary" className="rounded-xl border bg-card p-4">

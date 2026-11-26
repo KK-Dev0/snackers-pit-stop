@@ -13,6 +13,8 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { toast } from "sonner";
+import Link from "next/link";
 import {
   CalendarDaysIcon,
   ChevronLeftIcon,
@@ -21,12 +23,13 @@ import {
 } from "lucide-react";
 
 import { EmptyState } from "@/components/common/empty-state";
+import { ErrorState } from "@/components/common/error-state";
 import { PageHeader } from "@/components/common/page-header";
+import { PlanSkeleton } from "@/components/common/states";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { motionTokens } from "@/lib/motion";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
   SheetContent,
@@ -139,19 +142,39 @@ export default function PlanPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; slot: string } | null>(null);
   const [status, setStatus] = useState("");
+  const [catalogError, setCatalogError] = useState(false);
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
+  const announce = useCallback((message: string, ok = true) => {
+    setStatus(message);
+    if (ok) toast.success(message);
+    else toast.error(message);
+  }, []);
+
   useEffect(() => {
-    Promise.all([
-      fetch("/api/recipes?limit=100").then((r) => r.json()),
-      fetch("/api/ingredients").then((r) => r.json()),
-    ])
+    let active = true;
+    const getJson = async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Request failed");
+      return response.json();
+    };
+    Promise.all([getJson("/api/recipes?limit=100"), getJson("/api/ingredients")])
       .then(([recipeData, ingredientData]) => {
+        if (!active) return;
         setRecipes(recipeData.items ?? []);
         setIngredients(ingredientData.items ?? []);
+        setCatalogError(false);
       })
-      .catch(() => setStatus("Could not load recipe details. Plan estimates may be incomplete."));
-  }, []);
+      .catch(() => {
+        if (!active) return;
+        setCatalogError(true);
+        announce("Could not load recipe details. Plan estimates may be incomplete.", false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [announce, catalogAttempt]);
 
   const ingMap = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients]);
   const recipeMap = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
@@ -222,9 +245,9 @@ export default function PlanPage() {
       await db.plans.put(plan);
       await db.planMeals.where("planId").equals(plan.id).delete();
       await db.planMeals.bulkPut(generated);
-      setStatus(`Generated a plan for the week of ${formatWeekLabel(weekStart)}.`);
+      announce(`Generated a plan for the week of ${formatWeekLabel(weekStart)}.`);
     } catch {
-      setStatus("Could not generate the plan. Please try again.");
+      announce("Could not generate the plan. Please try again.", false);
     } finally {
       setLoading(false);
     }
@@ -252,9 +275,9 @@ export default function PlanPage() {
       await db.plans.put(plan);
       await db.planMeals.where("planId").equals(plan.id).delete();
       await db.planMeals.bulkPut(copied);
-      setStatus(`Copied ${copied.length} meals from last week.`);
+      announce(`Copied ${copied.length} meals from last week.`);
     } catch {
-      setStatus("Could not copy last week's plan. Please try again.");
+      announce("Could not copy last week's plan. Please try again.", false);
     } finally {
       setLoading(false);
     }
@@ -270,12 +293,12 @@ export default function PlanPage() {
     try {
       await db.planMeals.put({ ...meal, recipeId });
       const replacement = recipes.find((recipe) => recipe.id === recipeId);
-      setStatus(
+      announce(
         `Replaced ${DAYS[swapTarget.dayIndex]} ${swapTarget.slot} with ${replacement?.title ?? recipeId}.`,
       );
       setSwapTarget(null);
     } catch {
-      setStatus("Could not swap that meal. Please try again.");
+      announce("Could not swap that meal. Please try again.", false);
     }
   };
 
@@ -285,9 +308,9 @@ export default function PlanPage() {
     const db = getDb();
     try {
       await db.planMeals.put({ ...meal, locked: !meal.locked });
-      setStatus(`${DAYS[meal.dayIndex]} ${meal.slot} ${meal.locked ? "unlocked" : "locked"}.`);
+      announce(`${DAYS[meal.dayIndex]} ${meal.slot} ${meal.locked ? "unlocked" : "locked"}.`);
     } catch {
-      setStatus("Could not update that meal's lock. Please try again.");
+      announce("Could not update that meal's lock. Please try again.", false);
     }
   };
 
@@ -318,9 +341,9 @@ export default function PlanPage() {
       const db = getDb();
       await db.planMeals.where("planId").equals(newPlan.id).delete();
       await db.planMeals.bulkPut(generated);
-      setStatus(`Regenerated ${generated.length} meals; locked meals were kept.`);
+      announce(`Regenerated ${generated.length} meals; locked meals were kept.`);
     } catch {
-      setStatus("Could not regenerate the plan. Please try again.");
+      announce("Could not regenerate the plan. Please try again.", false);
     } finally {
       setLoading(false);
     }
@@ -347,13 +370,13 @@ export default function PlanPage() {
           dayIndex: meal.dayIndex,
           slot: meal.slot,
         });
-        setStatus(`Swapped meals with ${slotTargetLabel(String(over.id))}.`);
+        announce(`Swapped meals with ${slotTargetLabel(String(over.id))}.`);
       } else {
         await db.planMeals.put({ ...meal, dayIndex, slot });
-        setStatus(`Moved meal to ${slotTargetLabel(String(over.id))}.`);
+        announce(`Moved meal to ${slotTargetLabel(String(over.id))}.`);
       }
     } catch {
-      setStatus("Could not move that meal. Please try again.");
+      announce("Could not move that meal. Please try again.", false);
     }
   };
 
@@ -374,10 +397,7 @@ export default function PlanPage() {
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
       {profile === undefined || plans === undefined ? (
-        <>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-64 w-full" />
-        </>
+        <PlanSkeleton />
       ) : (
         <>
           <PageHeader
@@ -388,6 +408,14 @@ export default function PlanPage() {
           <p role="status" aria-live="polite" className="sr-only">
             {status}
           </p>
+          {catalogError && (
+            <ErrorState
+              compact
+              title="Recipe catalog unavailable"
+              description="Estimates and swaps may be incomplete until the catalog loads."
+              retry={() => setCatalogAttempt((attempt) => attempt + 1)}
+            />
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Button
@@ -461,6 +489,17 @@ export default function PlanPage() {
               icon={CalendarDaysIcon}
               title="No plan yet"
               description="Generate a plan for this week, or copy last week's meals and start from there."
+              action={
+                profile ? (
+                  <Button onClick={() => void generate()} disabled={loading}>
+                    {loading ? "Generating…" : "Generate this week"}
+                  </Button>
+                ) : (
+                  <Button asChild>
+                    <Link href="/onboarding">Complete onboarding</Link>
+                  </Button>
+                )
+              }
             />
           ) : (
             <DndContext
@@ -551,23 +590,36 @@ export default function PlanPage() {
                 </SheetDescription>
               </SheetHeader>
               <div className="mt-4 space-y-2">
-                {alternatives.map((r) => {
-                  const preview = mealStats(r.id, 1);
-                  return (
-                    <SheetClose asChild key={r.id}>
-                      <button
-                        type="button"
-                        onClick={() => replaceMeal(r.id)}
-                        className="w-full rounded-md border p-3 text-left hover:bg-muted"
-                      >
-                        <p className="font-medium">{r.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {preview.kcal} kcal · ₹{preview.cost.toFixed(0)}
-                        </p>
-                      </button>
-                    </SheetClose>
-                  );
-                })}
+                {alternatives.length === 0 ? (
+                  <EmptyState
+                    icon={CalendarDaysIcon}
+                    title="No alternatives match"
+                    description="No other recipes fit your diet and filters right now."
+                    action={
+                      <Button asChild variant="outline">
+                        <Link href="/recipes">Browse recipes</Link>
+                      </Button>
+                    }
+                  />
+                ) : (
+                  alternatives.map((r) => {
+                    const preview = mealStats(r.id, 1);
+                    return (
+                      <SheetClose asChild key={r.id}>
+                        <button
+                          type="button"
+                          onClick={() => void replaceMeal(r.id)}
+                          className="w-full rounded-md border p-3 text-left hover:bg-muted"
+                        >
+                          <p className="font-medium">{r.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {preview.kcal} kcal · ₹{preview.cost.toFixed(0)}
+                          </p>
+                        </button>
+                      </SheetClose>
+                    );
+                  })
+                )}
               </div>
             </SheetContent>
           </Sheet>
