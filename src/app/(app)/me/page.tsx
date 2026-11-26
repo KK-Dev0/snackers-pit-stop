@@ -239,6 +239,8 @@ export default function MePage() {
                 {busy === "export" ? "Preparing…" : "Export JSON"}
               </Button>
               <input
+                id="backup-import"
+                name="backupImport"
                 ref={importInputRef}
                 type="file"
                 accept="application/json"

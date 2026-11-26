@@ -145,6 +145,7 @@ export default function OnboardingPage() {
               <Label htmlFor="servings">Household servings</Label>
               <Input
                 id="servings"
+                name="servings"
                 type="number"
                 value={servings}
                 onChange={(e) => setServings(Number(e.target.value))}
@@ -161,6 +162,7 @@ export default function OnboardingPage() {
               <Label htmlFor="calorie-goal">Calorie goal (per day)</Label>
               <Input
                 id="calorie-goal"
+                name="calorieGoal"
                 type="number"
                 value={calorieGoal}
                 onChange={(e) => setCalorieGoal(Number(e.target.value))}
@@ -170,6 +172,7 @@ export default function OnboardingPage() {
               <Label htmlFor="weekly-budget">Weekly budget (INR)</Label>
               <Input
                 id="weekly-budget"
+                name="weeklyBudgetInr"
                 type="number"
                 value={weeklyBudget}
                 onChange={(e) => setWeeklyBudget(Number(e.target.value))}
@@ -215,7 +218,12 @@ export default function OnboardingPage() {
             </div>
             <div>
               <Label htmlFor="dislikes">Dislikes (comma separated)</Label>
-              <Input id="dislikes" value={dislikes} onChange={(e) => setDislikes(e.target.value)} />
+              <Input
+                id="dislikes"
+                name="dislikes"
+                value={dislikes}
+                onChange={(e) => setDislikes(e.target.value)}
+              />
             </div>
           </div>
         )}

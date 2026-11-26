@@ -133,6 +133,7 @@ export function StorePicker({
           <Label htmlFor="custom-kirana-name">Name your local kirana (optional)</Label>
           <Input
             id="custom-kirana-name"
+            name="customStoreName"
             value={customName}
             placeholder="Other local kirana"
             onChange={(event) => handleCustomName(event.target.value)}

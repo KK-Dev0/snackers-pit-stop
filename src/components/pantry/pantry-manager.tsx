@@ -201,6 +201,8 @@ export function PantryManager() {
             aria-hidden="true"
           />
           <Input
+            id="pantry-search"
+            name="pantrySearch"
             type="search"
             value={query}
             placeholder="Search your pantry"
@@ -213,7 +215,11 @@ export function PantryManager() {
           <Label htmlFor="pantry-sort" className="sr-only">
             Sort pantry items
           </Label>
-          <Select value={sort} onValueChange={(value) => setSort(value as SortOption)}>
+          <Select
+            name="pantrySort"
+            value={sort}
+            onValueChange={(value) => setSort(value as SortOption)}
+          >
             <SelectTrigger id="pantry-sort">
               <SelectValue />
             </SelectTrigger>
@@ -319,6 +325,7 @@ export function PantryManager() {
                 <Label htmlFor="pantry-name">Item name</Label>
                 <Input
                   id="pantry-name"
+                  name="pantryItemName"
                   value={form.name}
                   autoComplete="off"
                   placeholder="e.g. toor dal"
@@ -330,6 +337,7 @@ export function PantryManager() {
                   <Label htmlFor="pantry-quantity">Quantity</Label>
                   <Input
                     id="pantry-quantity"
+                    name="pantryQuantity"
                     type="number"
                     min="0.01"
                     step="any"
@@ -341,6 +349,7 @@ export function PantryManager() {
                 <div className="space-y-1.5">
                   <Label htmlFor="pantry-unit">Unit</Label>
                   <Select
+                    name="pantryUnit"
                     value={form.unit}
                     onValueChange={(value) => setForm({ ...form, unit: value as Unit })}
                   >
@@ -360,6 +369,7 @@ export function PantryManager() {
               <div className="flex items-center gap-2">
                 <Checkbox
                   id="pantry-staple"
+                  name="pantryStaple"
                   checked={form.isStaple}
                   onCheckedChange={(checked) =>
                     setForm({ ...form, isStaple: checked === true })

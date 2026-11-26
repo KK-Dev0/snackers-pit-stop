@@ -242,6 +242,7 @@ export function ImportReviewForm({
           <Label htmlFor="review-title">Title</Label>
           <Input
             id="review-title"
+            name="title"
             value={state.title}
             onChange={(event) => update("title", event.target.value)}
           />
@@ -250,6 +251,7 @@ export function ImportReviewForm({
           <Label htmlFor="review-servings">Servings</Label>
           <Input
             id="review-servings"
+            name="servings"
             type="number"
             min={1}
             max={20}
@@ -261,6 +263,7 @@ export function ImportReviewForm({
           <Label htmlFor="review-cuisine">Cuisine</Label>
           <Input
             id="review-cuisine"
+            name="cuisine"
             value={state.cuisine}
             onChange={(event) => update("cuisine", event.target.value)}
           />
@@ -268,6 +271,7 @@ export function ImportReviewForm({
         <div className="space-y-1.5">
           <Label htmlFor="review-diet">Diet</Label>
           <Select
+            name="diet"
             value={state.diet}
             onValueChange={(value) => update("diet", value as DietType)}
           >
@@ -287,6 +291,7 @@ export function ImportReviewForm({
           <Label htmlFor="review-prep">Prep minutes</Label>
           <Input
             id="review-prep"
+            name="prepMin"
             type="number"
             min={0}
             value={state.prepMin}
@@ -297,6 +302,7 @@ export function ImportReviewForm({
           <Label htmlFor="review-cook">Cook minutes</Label>
           <Input
             id="review-cook"
+            name="cookMin"
             type="number"
             min={0}
             value={state.cookMin}
@@ -309,6 +315,7 @@ export function ImportReviewForm({
         <Label htmlFor="review-description">Description</Label>
         <Textarea
           id="review-description"
+          name="description"
           value={state.description}
           onChange={(event) => update("description", event.target.value)}
         />
@@ -352,6 +359,7 @@ export function ImportReviewForm({
         <Label htmlFor="review-tags">Tags (comma separated)</Label>
         <Input
           id="review-tags"
+          name="tags"
           value={state.tags}
           onChange={(event) => update("tags", event.target.value)}
         />
@@ -362,12 +370,16 @@ export function ImportReviewForm({
         {state.ingredients.map((row, index) => (
           <div key={row.key} className="grid grid-cols-[1fr_5rem_6rem_auto_auto] gap-2">
             <Input
+              id={`ingredient-name-${index + 1}`}
+              name={`ingredient-${index + 1}-name`}
               aria-label={`Ingredient ${index + 1} name`}
               placeholder="Ingredient"
               value={row.rawName}
               onChange={(event) => updateIngredient(row.key, { rawName: event.target.value })}
             />
             <Input
+              id={`ingredient-quantity-${index + 1}`}
+              name={`ingredient-${index + 1}-quantity`}
               aria-label={`Ingredient ${index + 1} quantity`}
               type="number"
               min={0}
@@ -376,10 +388,15 @@ export function ImportReviewForm({
               onChange={(event) => updateIngredient(row.key, { quantity: event.target.value })}
             />
             <Select
+              name={`ingredient-${index + 1}-unit`}
               value={row.unit}
               onValueChange={(value) => updateIngredient(row.key, { unit: value as Unit })}
             >
-              <SelectTrigger aria-label={`Ingredient ${index + 1} unit`} className="w-full">
+              <SelectTrigger
+                id={`ingredient-unit-${index + 1}`}
+                aria-label={`Ingredient ${index + 1} unit`}
+                className="w-full"
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -392,6 +409,8 @@ export function ImportReviewForm({
             </Select>
             <label className="flex items-center gap-1.5 text-sm">
               <Checkbox
+                id={`ingredient-optional-${index + 1}`}
+                name={`ingredient-${index + 1}-optional`}
                 checked={row.optional}
                 onCheckedChange={(checked) =>
                   updateIngredient(row.key, { optional: checked === true })
@@ -441,6 +460,7 @@ export function ImportReviewForm({
         <Label htmlFor="review-steps">Steps (one per line)</Label>
         <Textarea
           id="review-steps"
+          name="steps"
           value={state.stepsText}
           onChange={(event) => update("stepsText", event.target.value)}
           rows={5}
@@ -451,6 +471,7 @@ export function ImportReviewForm({
         <Label htmlFor="review-source">Source link</Label>
         <Input
           id="review-source"
+          name="sourceUrl"
           type="url"
           value={state.sourceUrl}
           placeholder="https://…"

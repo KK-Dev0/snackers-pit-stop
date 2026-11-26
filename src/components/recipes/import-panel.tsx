@@ -131,6 +131,7 @@ export function ImportPanel({ photoEnabled }: { photoEnabled: boolean }) {
               />
               <Input
                 id="import-url"
+                name="recipeUrl"
                 type="url"
                 inputMode="url"
                 placeholder="https://example.com/my-recipe"

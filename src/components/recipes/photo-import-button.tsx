@@ -75,6 +75,8 @@ export function PhotoImportButton({
   return (
     <div className="space-y-2">
       <input
+        id="recipe-photo"
+        name="recipePhoto"
         ref={inputRef}
         type="file"
         accept={ALLOWED_IMAGE_TYPES.join(",")}

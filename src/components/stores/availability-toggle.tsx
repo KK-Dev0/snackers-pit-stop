@@ -21,6 +21,7 @@ export function AvailabilityToggle({
     <div className="flex items-center gap-2">
       <Switch
         id={id}
+        name={`storeSelected-${storeId}`}
         checked={checked}
         onCheckedChange={onChange}
         aria-label={question}

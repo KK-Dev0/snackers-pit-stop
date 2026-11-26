@@ -108,6 +108,7 @@ export function PincodeField({
       <div className="flex gap-2">
         <Input
           id={id}
+          name={id}
           inputMode="numeric"
           autoComplete="postal-code"
           pattern="[0-9]*"
