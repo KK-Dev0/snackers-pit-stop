@@ -2,7 +2,6 @@
 
 import { motion, type Variants } from "framer-motion";
 
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { motionTokens, revealTransition } from "@/lib/motion";
 
 const itemVariants: Variants = {
@@ -23,12 +22,6 @@ export function StaggerList({
   className?: string;
   stagger?: number;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
     <motion.div
       className={className}
@@ -51,12 +44,6 @@ export function StaggerItem({
   children: React.ReactNode;
   className?: string;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
     <motion.div className={className} variants={itemVariants}>
       {children}

@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { motionTokens } from "@/lib/motion";
 
 /**
@@ -20,12 +19,6 @@ export function ScrollReveal({
   delay?: number;
   distance?: number;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
   return (
     <motion.div
       className={className}

@@ -1,4 +1,5 @@
 import { SerwistProvider } from "@serwist/next/react";
+import { MotionConfig } from "framer-motion";
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
 
@@ -72,15 +73,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ThemeProvider>
-          <ThemeColorSync />
-          <SerwistProvider
-            swUrl="/sw.js"
-            disable={process.env.NODE_ENV === "development"}
-            reloadOnOnline={false}
-          >
-            <OfflineBanner />
-            {children}
-          </SerwistProvider>
+          <MotionConfig reducedMotion="user">
+            <ThemeColorSync />
+            <SerwistProvider
+              swUrl="/sw.js"
+              disable={process.env.NODE_ENV === "development"}
+              reloadOnOnline={false}
+            >
+              <OfflineBanner />
+              {children}
+            </SerwistProvider>
+          </MotionConfig>
         </ThemeProvider>
       </body>
     </html>

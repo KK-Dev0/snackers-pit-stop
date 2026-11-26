@@ -6,10 +6,7 @@ import { ClipboardListIcon, RefreshCwIcon, Share2Icon } from "lucide-react";
 
 import type { ShoppingListStateRecord } from "@/client/db/dexie";
 import { listSavedRecipes } from "@/client/db/repos/savedRecipes";
-import {
-  getShoppingListState,
-  saveShoppingListState,
-} from "@/client/db/repos/shoppingListState";
+import { getShoppingListState, saveShoppingListState } from "@/client/db/repos/shoppingListState";
 import { usePantry } from "@/client/hooks/use-pantry";
 import { usePlans, usePlanMeals } from "@/client/hooks/use-plans";
 import { useProfile } from "@/client/hooks/use-profile";
@@ -24,10 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  generateShoppingList,
-  subtractPantryFromList,
-} from "@/lib/shopping-list";
+import { generateShoppingList, subtractPantryFromList } from "@/lib/shopping-list";
 import { formatShoppingListText, shareText } from "@/lib/sharing";
 import { listSearchQuery } from "@/lib/store-links";
 import { selectedStoresForHandoff } from "@/lib/store-selection";
@@ -83,10 +77,11 @@ function buildList(
       },
     ];
   });
-  return subtractPantryFromList(
-    generateShoppingList({ planId, meals: listMeals, ingredients }),
-    { pantry, ingredients, includeStaples },
-  );
+  return subtractPantryFromList(generateShoppingList({ planId, meals: listMeals, ingredients }), {
+    pantry,
+    ingredients,
+    includeStaples,
+  });
 }
 
 /** Reads the active plan and computes the merged, pantry-adjusted list. */
@@ -115,18 +110,14 @@ export function ShoppingListView() {
 
   useEffect(() => {
     let active = true;
-    const storeUrl = pincode
-      ? `/api/stores?pincode=${encodeURIComponent(pincode)}`
-      : "/api/stores";
+    const storeUrl = pincode ? `/api/stores?pincode=${encodeURIComponent(pincode)}` : "/api/stores";
     void Promise.all([
       fetch("/api/recipes?limit=100").then((response) => response.json()),
       fetch("/api/ingredients").then((response) => response.json()),
       fetch(storeUrl).then((response) => response.json()),
     ])
       .then(([recipeJson, ingredientJson, storeJson]) => {
-        const recipeData = RecipeSchema.array().safeParse(
-          (recipeJson as JsonShape).items ?? [],
-        );
+        const recipeData = RecipeSchema.array().safeParse((recipeJson as JsonShape).items ?? []);
         const ingredientData = IngredientListSchema.safeParse(
           (ingredientJson as JsonShape).items ?? [],
         );
@@ -226,7 +217,11 @@ export function ShoppingListView() {
 
   const share = async () => {
     const result = await shareText(
-      formatShoppingListText(items, `Shopping list · ${formatWeekLabel(activePlan.weekStart)}`, listState?.itemOrder),
+      formatShoppingListText(
+        items,
+        `Shopping list · ${formatWeekLabel(activePlan.weekStart)}`,
+        listState?.itemOrder,
+      ),
     );
     setShareMessage(
       result === "shared"
@@ -246,147 +241,151 @@ export function ShoppingListView() {
     updateState({ checkedKeys: [...next] });
   };
 
-  if (!activePlan) {
-    return (
-      <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
-        <PageHeader
-          eyebrow="One trip"
-          title="Shopping list"
-          description="Every ingredient in the week, merged, converted and grouped by aisle."
-        />
-        <EmptyState
-          icon={ClipboardListIcon}
-          title="No plan yet"
-          description="Generate a weekly plan first and your merged shopping list will appear here."
-          action={
-            <Button asChild>
-              <Link href="/plan">Go to planner</Link>
-            </Button>
-          }
-        />
-      </PageReveal>
-    );
-  }
-
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
-      <PageHeader
-        eyebrow="One trip"
-        title="Shopping list"
-        description={`Week of ${formatWeekLabel(activePlan.weekStart)} · merged from your plan, minus the pantry.`}
-      />
-
-      {error ? (
-        <div role="alert">
+      {!activePlan ? (
+        <>
+          <PageHeader
+            eyebrow="One trip"
+            title="Shopping list"
+            description="Every ingredient in the week, merged, converted and grouped by aisle."
+          />
           <EmptyState
-            icon={RefreshCwIcon}
-            title="Could not build the list"
-            description="The recipe catalog is unavailable right now. Please try again."
+            icon={ClipboardListIcon}
+            title="No plan yet"
+            description="Generate a weekly plan first and your merged shopping list will appear here."
             action={
-              <Button type="button" variant="outline" onClick={() => setRetryCount((count) => count + 1)}>
-                Retry
+              <Button asChild>
+                <Link href="/plan">Go to planner</Link>
               </Button>
             }
           />
-        </div>
-      ) : loading || !listState || !generated ? (
-        <div className="space-y-3">
-          <Skeleton className="h-16 w-full rounded-xl" />
-          <Skeleton className="h-48 w-full rounded-xl" />
-        </div>
+        </>
       ) : (
         <>
-          <section aria-label="List summary" className="rounded-xl border bg-card p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-display text-xl font-semibold tabular-nums">
-                  {items.length} {items.length === 1 ? "item" : "items"}
-                </p>
-                <p className="text-sm text-muted-foreground tabular-nums">
-                  {checkedCount} checked · approx ₹{totalCost.toFixed(0)}
-                </p>
-                <p aria-live="polite" className="sr-only">
-                  {checkedCount} of {items.length} items checked off.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <StoreHandoff
-                  stores={handoffStores}
-                  query={listSearchQuery(items, listState?.itemOrder)}
-                  items={items}
-                  savedOrder={listState?.itemOrder}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  disabled={items.length === 0}
-                  onClick={() => void share()}
-                >
-                  <Share2Icon aria-hidden="true" /> Copy / share
-                </Button>
-                {checkedCount > 0 ? (
+          <PageHeader
+            eyebrow="One trip"
+            title="Shopping list"
+            description={`Week of ${formatWeekLabel(activePlan.weekStart)} · merged from your plan, minus the pantry.`}
+          />
+
+          {error ? (
+            <div role="alert">
+              <EmptyState
+                icon={RefreshCwIcon}
+                title="Could not build the list"
+                description="The recipe catalog is unavailable right now. Please try again."
+                action={
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => updateState({ checkedKeys: [] })}
+                    variant="outline"
+                    onClick={() => setRetryCount((count) => count + 1)}
                   >
-                    Reset checks
+                    Retry
                   </Button>
-                ) : null}
-                <Checkbox
-                  id="include-staples"
-                  checked={listState.includeStaples}
-                  onCheckedChange={(checked) =>
-                    updateState({ includeStaples: checked === true })
+                }
+              />
+            </div>
+          ) : loading || !listState || !generated ? (
+            <div className="space-y-3">
+              <Skeleton className="h-16 w-full rounded-xl" />
+              <Skeleton className="h-48 w-full rounded-xl" />
+            </div>
+          ) : (
+            <>
+              <section aria-label="List summary" className="rounded-xl border bg-card p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-display text-xl font-semibold tabular-nums">
+                      {items.length} {items.length === 1 ? "item" : "items"}
+                    </p>
+                    <p className="text-sm text-muted-foreground tabular-nums">
+                      {checkedCount} checked · approx ₹{totalCost.toFixed(0)}
+                    </p>
+                    <p aria-live="polite" className="sr-only">
+                      {checkedCount} of {items.length} items checked off.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StoreHandoff
+                      stores={handoffStores}
+                      query={listSearchQuery(items, listState?.itemOrder)}
+                      items={items}
+                      savedOrder={listState?.itemOrder}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={items.length === 0}
+                      onClick={() => void share()}
+                    >
+                      <Share2Icon aria-hidden="true" /> Copy / share
+                    </Button>
+                    {checkedCount > 0 ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => updateState({ checkedKeys: [] })}
+                      >
+                        Reset checks
+                      </Button>
+                    ) : null}
+                    <Checkbox
+                      id="include-staples"
+                      checked={listState.includeStaples}
+                      onCheckedChange={(checked) =>
+                        updateState({ includeStaples: checked === true })
+                      }
+                    />
+                    <Label htmlFor="include-staples" className="font-normal">
+                      Include staples
+                    </Label>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Prices and nutrition are rough estimates. Check labels for allergens.
+                </p>
+                <p aria-live="polite" className="mt-1 text-xs text-muted-foreground">
+                  {shareMessage}
+                </p>
+              </section>
+
+              {items.length === 0 ? (
+                <EmptyState
+                  icon={ClipboardListIcon}
+                  title="Nothing to shop for"
+                  description="Your plan's ingredients are already covered by the pantry, or the week has no meals yet."
+                  action={
+                    <Button asChild variant="outline">
+                      <Link href="/plan">Review the plan</Link>
+                    </Button>
                   }
                 />
-                <Label htmlFor="include-staples" className="font-normal">
-                  Include staples
-                </Label>
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Prices and nutrition are rough estimates. Check labels for allergens.
-            </p>
-            <p aria-live="polite" className="mt-1 text-xs text-muted-foreground">
-              {shareMessage}
-            </p>
-          </section>
-
-          {items.length === 0 ? (
-            <EmptyState
-              icon={ClipboardListIcon}
-              title="Nothing to shop for"
-              description="Your plan's ingredients are already covered by the pantry, or the week has no meals yet."
-              action={
-                <Button asChild variant="outline">
-                  <Link href="/plan">Review the plan</Link>
-                </Button>
-              }
-            />
-          ) : (
-            <AisleSections
-              items={items}
-              savedOrder={listState.itemOrder}
-              onMove={(next) => updateState({ itemOrder: next.map((item) => item.key) })}
-              renderItem={(item) => (
-                <div className="flex items-center gap-1">
-                  <div className="min-w-0 flex-1">
-                    <ShoppingListItem item={item} onToggle={toggleChecked} />
-                  </div>
-                  <StoreHandoff
-                    stores={handoffStores}
-                    query={item.name}
-                    items={[item]}
-                    savedOrder={[]}
-                    label="Find at"
-                    compact
-                  />
-                </div>
+              ) : (
+                <AisleSections
+                  items={items}
+                  savedOrder={listState.itemOrder}
+                  onMove={(next) => updateState({ itemOrder: next.map((item) => item.key) })}
+                  renderItem={(item) => (
+                    <div className="flex items-center gap-1">
+                      <div className="min-w-0 flex-1">
+                        <ShoppingListItem item={item} onToggle={toggleChecked} />
+                      </div>
+                      <StoreHandoff
+                        stores={handoffStores}
+                        query={item.name}
+                        items={[item]}
+                        savedOrder={[]}
+                        label="Find at"
+                        compact
+                      />
+                    </div>
+                  )}
+                />
               )}
-            />
+            </>
           )}
         </>
       )}

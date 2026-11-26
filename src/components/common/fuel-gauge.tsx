@@ -4,7 +4,7 @@ import { useId } from "react";
 import { motion } from "framer-motion";
 
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { motionTokens } from "@/lib/motion";
+import { motionTokens, revealTransition } from "@/lib/motion";
 
 const ARC_RADIUS = 78;
 
@@ -27,6 +27,11 @@ export function FuelGauge({
   const gradientId = useId();
   const ratio = max > 0 ? Math.min(Math.max(value / max, 0), 1) : 0;
   const overBudget = max > 0 && value > max;
+  const durationMs = Math.round(motionTokens.duration.base * 1000);
+  const arcTransition = {
+    ...revealTransition,
+    duration: reduceMotion ? 0 : motionTokens.duration.base,
+  };
 
   return (
     <div className={className}>
@@ -65,7 +70,7 @@ export function FuelGauge({
           strokeLinecap="round"
           initial={reduceMotion ? false : { pathLength: 0 }}
           animate={{ pathLength: ratio }}
-          transition={{ duration: motionTokens.duration.landing, ease: [...motionTokens.ease] }}
+          transition={arcTransition}
         />
 
         {/* Needle */}
@@ -74,29 +79,19 @@ export function FuelGauge({
             transformOrigin: "100px 100px",
             transformBox: "view-box",
             transform: `rotate(${-90 + ratio * 180}deg)`,
-            transition: reduceMotion ? "none" : "transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+            transition: reduceMotion
+              ? "none"
+              : `transform ${durationMs}ms cubic-bezier(${motionTokens.ease.join(", ")})`,
           }}
         >
           <line x1="100" y1="100" x2="100" y2="36" stroke="var(--foreground)" strokeWidth="2.5" />
           <circle cx="100" cy="100" r="5" fill="var(--foreground)" />
         </g>
 
-        <text
-          x="24"
-          y="122"
-          textAnchor="middle"
-          fill="var(--muted-foreground)"
-          fontSize="9"
-        >
+        <text x="24" y="122" textAnchor="middle" fill="var(--muted-foreground)" fontSize="9">
           ₹0
         </text>
-        <text
-          x="176"
-          y="122"
-          textAnchor="middle"
-          fill="var(--muted-foreground)"
-          fontSize="9"
-        >
+        <text x="176" y="122" textAnchor="middle" fill="var(--muted-foreground)" fontSize="9">
           ₹{Math.round(max).toLocaleString("en-IN")}
         </text>
       </svg>

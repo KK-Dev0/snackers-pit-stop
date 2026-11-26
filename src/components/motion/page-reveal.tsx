@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 
-import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { motionTokens, revealTransition } from "@/lib/motion";
 
 /**
@@ -18,12 +17,8 @@ export function PageReveal({
   className?: string;
   delay?: number;
 }) {
-  const reduceMotion = useReducedMotion();
-
-  if (reduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
+  // MotionConfig's "user" mode drops the lift for reduced-motion users while
+  // keeping the fade, and renders the same tree on server and client.
   return (
     <motion.div
       className={className}

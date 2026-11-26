@@ -2,7 +2,7 @@
 
 Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 minutes. Tick a box only when the task is complete and verified.
 
-**Status:** 105 of 111 complete · **Current:** M7 in progress — next is task 106.
+**Status:** 106 of 111 complete · **Current:** M7 in progress — next is task 107.
 
 ## How to use
 
@@ -133,7 +133,7 @@ Living checklist for **Snackers Pit Stop**. Each task is scoped to roughly 15 mi
 - [x] 103. **Add the About and Disclaimers page.** Not medical advice, estimates only, allergen filtering is best-effort, no affiliation with listed stores; link it from the footer and Me.
 - [x] 104. **Accessibility audit.** Keyboard paths, focus-visible, labels/aria, heading order, live regions, and contrast fixes.
 - [x] 105. **Dark mode audit.** Every screen, gauge, skeleton and toast; fix token misuse.
-- [ ] 106. **Motion audit.** Reduced-motion coverage, 400 ms cap on app screens, no layout jank, and skeleton timing.
+- [x] 106. **Motion audit.** Reduced-motion coverage, 400 ms cap on app screens, no layout jank, and skeleton timing.
 - [ ] 107. **Performance pass.** Font/image optimization, bundle trimming, route-level code splitting, and Lighthouse 90+ on mobile.
 - [ ] 108. **Polish states.** Consistent skeletons, empty states, error boundaries, toasts, and retry actions.
 - [ ] 109. **Add the Playwright smoke test.** Onboarding → generate plan → shopping list against a seeded local DB.

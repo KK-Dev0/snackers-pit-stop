@@ -12,6 +12,7 @@ import {
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 import {
   CalendarDaysIcon,
   ChevronLeftIcon,
@@ -23,6 +24,8 @@ import { EmptyState } from "@/components/common/empty-state";
 import { PageHeader } from "@/components/common/page-header";
 import { PageReveal } from "@/components/motion/page-reveal";
 import { Button } from "@/components/ui/button";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { motionTokens } from "@/lib/motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sheet,
@@ -55,15 +58,26 @@ function DraggableMeal({
   label: string;
   children: ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const reduceMotion = useReducedMotion();
+  const { attributes, listeners, setNodeRef, isDragging, transform } = useDraggable({
     id,
     data: { label },
   });
+  const durationMs = Math.round(motionTokens.duration.base * 1000);
   return (
     <div
       ref={setNodeRef}
-      style={{ opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-start gap-1"
+      style={{
+        opacity: isDragging ? 0.85 : 1,
+        transform: reduceMotion ? undefined : CSS.Transform.toString(transform),
+        transition:
+          reduceMotion || isDragging
+            ? undefined
+            : `transform ${durationMs}ms cubic-bezier(${motionTokens.ease.join(", ")})`,
+        touchAction: "none",
+        zIndex: isDragging ? 10 : undefined,
+      }}
+      className="relative flex items-start gap-1"
     >
       <button
         type="button"
@@ -104,7 +118,7 @@ function DroppableSlot({
       ref={setNodeRef}
       role="group"
       aria-label={`${label} slot`}
-      className={isOver ? "rounded-md ring-2 ring-primary" : undefined}
+      className={`rounded-md transition-shadow duration-200 ${isOver ? "ring-2 ring-primary" : ""}`}
     >
       {children}
     </div>
@@ -118,19 +132,14 @@ export default function PlanPage() {
   const [selectedWeekStart, setSelectedWeekStart] = useState(currentWeekStart);
   const activePlan = plans.find((p) => p.weekStart === selectedWeekStart);
   const activePlanId = activePlan?.id ?? null;
-  const previousPlan = plans.find(
-    (p) => p.weekStart === addDays(selectedWeekStart, -7),
-  );
+  const previousPlan = plans.find((p) => p.weekStart === addDays(selectedWeekStart, -7));
   const meals = usePlanMeals(activePlanId);
   const [loading, setLoading] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; slot: string } | null>(null);
   const [status, setStatus] = useState("");
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor),
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   useEffect(() => {
     Promise.all([
@@ -150,7 +159,7 @@ export default function PlanPage() {
     const recipe = recipes.find((r) => r.id === recipeId);
     if (!recipe) return { kcal: 0, cost: 0 };
     const items = (recipe.ingredients ?? []).map((ri: any) => ({
-      ingredient: ri.ingredientId ? ingMap.get(ri.ingredientId) ?? null : null,
+      ingredient: ri.ingredientId ? (ingMap.get(ri.ingredientId) ?? null) : null,
       quantity: ri.quantity,
       unit: ri.unit,
     }));
@@ -213,10 +222,7 @@ export default function PlanPage() {
     setLoading(true);
     try {
       const db = getDb();
-      const previousMeals = await db.planMeals
-        .where("planId")
-        .equals(previousPlan.id)
-        .toArray();
+      const previousMeals = await db.planMeals.where("planId").equals(previousPlan.id).toArray();
       const now = Date.now();
       const plan: Plan = {
         id: `plan-${selectedWeekStart}`,
@@ -266,9 +272,7 @@ export default function PlanPage() {
     const db = getDb();
     try {
       await db.planMeals.put({ ...meal, locked: !meal.locked });
-      setStatus(
-        `${DAYS[meal.dayIndex]} ${meal.slot} ${meal.locked ? "unlocked" : "locked"}.`,
-      );
+      setStatus(`${DAYS[meal.dayIndex]} ${meal.slot} ${meal.locked ? "unlocked" : "locked"}.`);
     } catch {
       setStatus("Could not update that meal's lock. Please try again.");
     }
@@ -350,213 +354,208 @@ export default function PlanPage() {
       ).slice(0, 8)
     : [];
 
-  if (profile === undefined || plans === undefined) {
-    return (
-      <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-      </PageReveal>
-    );
-  }
-
   return (
     <PageReveal className="mx-auto w-full max-w-5xl space-y-6 px-5 py-8 sm:px-6">
-      <PageHeader
-        eyebrow="Planner"
-        title="Your week, sorted"
-        description="Breakfast, lunch, snack and dinner for seven days — built around your diet, calories and budget."
-      />
-      <p role="status" aria-live="polite" className="sr-only">
-        {status}
-      </p>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Previous week"
-            onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, -7))}
-          >
-            <ChevronLeftIcon />
-          </Button>
-          <span aria-live="polite" className="min-w-28 text-center text-sm font-medium">
-            Week of {formatWeekLabel(selectedWeekStart)}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Next week"
-            onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, 7))}
-          >
-            <ChevronRightIcon />
-          </Button>
-          {selectedWeekStart !== currentWeekStart && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedWeekStart(currentWeekStart)}
-            >
-              This week
-            </Button>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={copyLastWeek}
-            disabled={loading || !previousPlan || !!activePlan}
-          >
-            Copy last week
-          </Button>
-          <Button
-            variant="outline"
-            onClick={regenerate}
-            disabled={loading || !profile || meals.length === 0}
-          >
-            Regenerate
-          </Button>
-          <Button onClick={generate} disabled={loading || !profile}>
-            {loading ? "Generating…" : "Generate plan"}
-          </Button>
-        </div>
-      </div>
-
-      {profile && meals.length > 0 && (
-        <div className="rounded-lg border bg-card p-4">
-          <h2 className="font-semibold">Weekly budget</h2>
-          <FuelGauge
-            value={weeklyCost}
-            max={profile.weeklyBudgetInr}
-            label="Weekly budget used"
-            className="mx-auto max-w-xs"
-          />
-          <p className="text-center text-sm text-muted-foreground">
-            ₹{weeklyCost.toFixed(0)} of ₹{profile.weeklyBudgetInr} · {profile.calorieGoal} kcal/day goal
-          </p>
-        </div>
-      )}
-
-      {meals.length === 0 ? (
-        <EmptyState
-          icon={CalendarDaysIcon}
-          title="No plan yet"
-          description="Generate a plan for this week, or copy last week's meals and start from there."
-        />
+      {profile === undefined || plans === undefined ? (
+        <>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </>
       ) : (
-        <DndContext
-          sensors={sensors}
-          onDragEnd={handleDragEnd}
-          accessibility={{
-            screenReaderInstructions: {
-              draggable:
-                "Press Enter or Space on a meal's Move button, use the arrow keys to choose a day and slot, then press Space to drop. Press Escape to cancel.",
-            },
-            announcements: {
-              onDragStart: ({ active }) =>
-                `Picked up ${String(active.data.current?.label ?? draggedMealLabel(active.id))}.`,
-              onDragOver: ({ over }) =>
-                over ? `Over ${slotTargetLabel(over.id)}.` : "No drop target.",
-              onDragEnd: ({ active, over }) =>
-                over
-                  ? `Dropped ${String(active.data.current?.label ?? draggedMealLabel(active.id))} on ${slotTargetLabel(over.id)}.`
-                  : "Move cancelled.",
-              onDragCancel: () => "Move cancelled.",
-            },
-          }}
-        >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
-            {DAYS.map((day, dayIndex) => (
-              <div key={day} className="rounded-lg border bg-card p-3">
-                <h2 className="font-semibold">{day}</h2>
-                <p className="text-xs text-muted-foreground">
-                  {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
-                </p>
-                <div className="mt-2 space-y-2">
-                  {SLOTS.map((slot) => {
-                    const meal = meals.find(
-                      (m) => m.dayIndex === dayIndex && m.slot === slot,
-                    );
-                    const slotLabel = `${day} ${slot}`;
-                    const recipeTitle =
-                      recipes.find((recipe) => recipe.id === meal?.recipeId)?.title ??
-                      meal?.recipeId;
-                    return (
-                      <DroppableSlot
-                        key={slot}
-                        id={`${dayIndex}:${slot}`}
-                        label={slotLabel}
-                      >
-                        {meal ? (
-                          <DraggableMeal id={meal.id} label={slotLabel}>
-                            <div className="rounded-md bg-muted p-2 text-sm">
-                              <div className="flex items-center justify-between gap-2">
-                                <span className="text-muted-foreground">{slot}</span>
-                                <span className="flex gap-2">
-                                  <button
-                                    type="button"
-                                    aria-label={`${meal.locked ? "Unlock" : "Lock"} ${slotLabel}: ${recipeTitle}`}
-                                    className="text-xs text-foreground underline decoration-primary underline-offset-2"
-                                    onClick={() => toggleLock(meal.id)}
-                                  >
-                                    {meal.locked ? "Unlock" : "Lock"}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    aria-label={`Swap ${slotLabel}: ${recipeTitle}`}
-                                    className="text-xs text-foreground underline decoration-primary underline-offset-2"
-                                    onClick={() => setSwapTarget({ dayIndex, slot })}
-                                  >
-                                    Swap
-                                  </button>
-                                </span>
-                              </div>
-                              <p className="truncate">{recipeTitle ?? "—"}</p>
-                            </div>
-                          </DraggableMeal>
-                        ) : (
-                          <div className="rounded-md border border-dashed bg-muted/50 p-2 text-sm text-muted-foreground">
-                            <span className="sr-only">{slotLabel}: </span>No meal — drop here
-                          </div>
-                        )}
-                      </DroppableSlot>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+        <>
+          <PageHeader
+            eyebrow="Planner"
+            title="Your week, sorted"
+            description="Breakfast, lunch, snack and dinner for seven days — built around your diet, calories and budget."
+          />
+          <p role="status" aria-live="polite" className="sr-only">
+            {status}
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Previous week"
+                onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, -7))}
+              >
+                <ChevronLeftIcon />
+              </Button>
+              <span aria-live="polite" className="min-w-28 text-center text-sm font-medium">
+                Week of {formatWeekLabel(selectedWeekStart)}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Next week"
+                onClick={() => setSelectedWeekStart(addDays(selectedWeekStart, 7))}
+              >
+                <ChevronRightIcon />
+              </Button>
+              {selectedWeekStart !== currentWeekStart && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedWeekStart(currentWeekStart)}
+                >
+                  This week
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={copyLastWeek}
+                disabled={loading || !previousPlan || !!activePlan}
+              >
+                Copy last week
+              </Button>
+              <Button
+                variant="outline"
+                onClick={regenerate}
+                disabled={loading || !profile || meals.length === 0}
+              >
+                Regenerate
+              </Button>
+              <Button onClick={generate} disabled={loading || !profile}>
+                {loading ? "Generating…" : "Generate plan"}
+              </Button>
+            </div>
           </div>
-        </DndContext>
-      )}
 
-      <Sheet open={!!swapTarget} onOpenChange={(open) => !open && setSwapTarget(null)}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>Swap meal</SheetTitle>
-            <SheetDescription>
-              Choose an alternative {swapTarget?.slot} from your ranked recipes.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="mt-4 space-y-2">
-            {alternatives.map((r) => {
-              const preview = mealStats(r.id, 1);
-              return (
-                <SheetClose asChild key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => replaceMeal(r.id)}
-                    className="w-full rounded-md border p-3 text-left hover:bg-muted"
-                  >
-                    <p className="font-medium">{r.title}</p>
+          {profile && meals.length > 0 && (
+            <div className="rounded-lg border bg-card p-4">
+              <h2 className="font-semibold">Weekly budget</h2>
+              <FuelGauge
+                value={weeklyCost}
+                max={profile.weeklyBudgetInr}
+                label="Weekly budget used"
+                className="mx-auto max-w-xs"
+              />
+              <p className="text-center text-sm text-muted-foreground">
+                ₹{weeklyCost.toFixed(0)} of ₹{profile.weeklyBudgetInr} · {profile.calorieGoal}{" "}
+                kcal/day goal
+              </p>
+            </div>
+          )}
+
+          {meals.length === 0 ? (
+            <EmptyState
+              icon={CalendarDaysIcon}
+              title="No plan yet"
+              description="Generate a plan for this week, or copy last week's meals and start from there."
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              onDragEnd={handleDragEnd}
+              accessibility={{
+                screenReaderInstructions: {
+                  draggable:
+                    "Press Enter or Space on a meal's Move button, use the arrow keys to choose a day and slot, then press Space to drop. Press Escape to cancel.",
+                },
+                announcements: {
+                  onDragStart: ({ active }) =>
+                    `Picked up ${String(active.data.current?.label ?? draggedMealLabel(active.id))}.`,
+                  onDragOver: ({ over }) =>
+                    over ? `Over ${slotTargetLabel(over.id)}.` : "No drop target.",
+                  onDragEnd: ({ active, over }) =>
+                    over
+                      ? `Dropped ${String(active.data.current?.label ?? draggedMealLabel(active.id))} on ${slotTargetLabel(over.id)}.`
+                      : "Move cancelled.",
+                  onDragCancel: () => "Move cancelled.",
+                },
+              }}
+            >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                {DAYS.map((day, dayIndex) => (
+                  <div key={day} className="rounded-lg border bg-card p-3">
+                    <h2 className="font-semibold">{day}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {preview.kcal} kcal · ₹{preview.cost.toFixed(0)}
+                      {dayStats(dayIndex).kcal} kcal · ₹{dayStats(dayIndex).cost.toFixed(0)}
                     </p>
-                  </button>
-                </SheetClose>
-              );
-            })}
-          </div>
-        </SheetContent>
-      </Sheet>
+                    <div className="mt-2 space-y-2">
+                      {SLOTS.map((slot) => {
+                        const meal = meals.find((m) => m.dayIndex === dayIndex && m.slot === slot);
+                        const slotLabel = `${day} ${slot}`;
+                        const recipeTitle =
+                          recipes.find((recipe) => recipe.id === meal?.recipeId)?.title ??
+                          meal?.recipeId;
+                        return (
+                          <DroppableSlot key={slot} id={`${dayIndex}:${slot}`} label={slotLabel}>
+                            {meal ? (
+                              <DraggableMeal id={meal.id} label={slotLabel}>
+                                <div className="rounded-md bg-muted p-2 text-sm">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-muted-foreground">{slot}</span>
+                                    <span className="flex gap-2">
+                                      <button
+                                        type="button"
+                                        aria-label={`${meal.locked ? "Unlock" : "Lock"} ${slotLabel}: ${recipeTitle}`}
+                                        className="text-xs text-foreground underline decoration-primary underline-offset-2"
+                                        onClick={() => toggleLock(meal.id)}
+                                      >
+                                        {meal.locked ? "Unlock" : "Lock"}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        aria-label={`Swap ${slotLabel}: ${recipeTitle}`}
+                                        className="text-xs text-foreground underline decoration-primary underline-offset-2"
+                                        onClick={() => setSwapTarget({ dayIndex, slot })}
+                                      >
+                                        Swap
+                                      </button>
+                                    </span>
+                                  </div>
+                                  <p className="truncate">{recipeTitle ?? "—"}</p>
+                                </div>
+                              </DraggableMeal>
+                            ) : (
+                              <div className="rounded-md border border-dashed bg-muted/50 p-2 text-sm text-muted-foreground">
+                                <span className="sr-only">{slotLabel}: </span>No meal — drop here
+                              </div>
+                            )}
+                          </DroppableSlot>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </DndContext>
+          )}
+
+          <Sheet open={!!swapTarget} onOpenChange={(open) => !open && setSwapTarget(null)}>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Swap meal</SheetTitle>
+                <SheetDescription>
+                  Choose an alternative {swapTarget?.slot} from your ranked recipes.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-4 space-y-2">
+                {alternatives.map((r) => {
+                  const preview = mealStats(r.id, 1);
+                  return (
+                    <SheetClose asChild key={r.id}>
+                      <button
+                        type="button"
+                        onClick={() => replaceMeal(r.id)}
+                        className="w-full rounded-md border p-3 text-left hover:bg-muted"
+                      >
+                        <p className="font-medium">{r.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {preview.kcal} kcal · ₹{preview.cost.toFixed(0)}
+                        </p>
+                      </button>
+                    </SheetClose>
+                  );
+                })}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
     </PageReveal>
   );
 }

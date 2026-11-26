@@ -44,7 +44,11 @@ export function RecipeBrowser() {
     async (offset: number, append: boolean) => {
       setLoading(true);
       setError(false);
-      const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String(offset), sort });
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        offset: String(offset),
+        sort,
+      });
       if (query.trim()) params.set("q", query.trim());
       if (diet !== "all") params.set("diet", diet);
       if (excluded.length) params.set("allergens", excluded.join(","));
@@ -72,11 +76,13 @@ export function RecipeBrowser() {
 
   // Reset and refetch when a filter changes (small debounce for the text input).
   useEffect(() => {
+    // Filter handlers set the placeholder immediately; only the request is debounced.
     const timer = window.setTimeout(() => void load(0, false), 250);
     return () => window.clearTimeout(timer);
   }, [load]);
 
   const toggleAllergen = (allergen: Allergen) => {
+    setLoading(true);
     setExcluded((previous) =>
       previous.includes(allergen)
         ? previous.filter((value) => value !== allergen)
@@ -99,7 +105,13 @@ export function RecipeBrowser() {
           <Label htmlFor="recipe-sort" className="sr-only">
             Sort recipes
           </Label>
-          <Select value={sort} onValueChange={(value) => setSort(value as RecipeSort)}>
+          <Select
+            value={sort}
+            onValueChange={(value) => {
+              setLoading(true);
+              setSort(value as RecipeSort);
+            }}
+          >
             <SelectTrigger id="recipe-sort" className="w-36">
               <SlidersHorizontalIcon className="size-3.5" aria-hidden="true" />
               <SelectValue />
@@ -125,7 +137,10 @@ export function RecipeBrowser() {
             placeholder="Search recipes, cuisines, tags…"
             aria-label="Search recipes"
             className="pl-9"
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setLoading(true);
+              setQuery(event.target.value);
+            }}
           />
         </div>
         <div className="w-full sm:w-40">
@@ -134,7 +149,10 @@ export function RecipeBrowser() {
           </Label>
           <Select
             value={diet}
-            onValueChange={(value) => setDiet(value as DietType | "all")}
+            onValueChange={(value) => {
+              setLoading(true);
+              setDiet(value as DietType | "all");
+            }}
           >
             <SelectTrigger id="recipe-diet" className="w-full">
               <SelectValue />
