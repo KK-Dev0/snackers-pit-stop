@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const AllergenSchema = z.enum([
+export const ALLERGENS = [
   "gluten",
   "dairy",
   "nuts",
@@ -10,7 +10,27 @@ export const AllergenSchema = z.enum([
   "fish",
   "shellfish",
   "sesame",
-]);
+] as const;
+
+export const AllergenSchema = z.enum(ALLERGENS);
+
+/**
+ * Keep only known allergen tags. Older profiles saved free-text values such as
+ * "None" or "peanuts"; those must never reach the strict API schema.
+ */
+export function normalizeAllergens(values: readonly string[]): Allergen[] {
+  const seen = new Set<Allergen>();
+  const result: Allergen[] = [];
+  for (const value of values ?? []) {
+    const candidate = value.trim().toLowerCase();
+    const allergen = ALLERGENS.find((item) => item === candidate);
+    if (allergen && !seen.has(allergen)) {
+      seen.add(allergen);
+      result.push(allergen);
+    }
+  }
+  return result;
+}
 
 export const DietTypeSchema = z.enum(["vegan", "veg", "eggetarian", "nonveg"]);
 

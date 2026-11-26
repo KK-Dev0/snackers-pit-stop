@@ -16,7 +16,7 @@ import { PincodeField } from "@/components/stores/pincode-field";
 import { StorePicker } from "@/components/stores/store-picker";
 import { Toaster } from "@/components/ui/sonner";
 import { isPincode } from "@/lib/geo";
-import type { Profile } from "@/lib/schemas";
+import { ALLERGENS, normalizeAllergens, type Allergen, type Profile } from "@/lib/schemas";
 
 const STEPS = ["Diet", "Goals", "Preferences", "Location & stores"];
 
@@ -30,7 +30,7 @@ export default function OnboardingPage() {
   const [servings, setServings] = useState(2);
   const [calorieGoal, setCalorieGoal] = useState(2000);
   const [weeklyBudget, setWeeklyBudget] = useState(2000);
-  const [allergens, setAllergens] = useState<string[]>([]);
+  const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [dislikes, setDislikes] = useState("");
   const [pincode, setPincode] = useState("");
   const [storeIds, setStoreIds] = useState<string[]>([]);
@@ -55,7 +55,7 @@ export default function OnboardingPage() {
         setServings(saved.servings ?? 2);
         setCalorieGoal(saved.calorieGoal ?? 2000);
         setWeeklyBudget(saved.weeklyBudgetInr ?? 2000);
-        setAllergens(saved.allergens ?? []);
+        setAllergens(normalizeAllergens(saved.allergens ?? []));
         setDislikes((saved.dislikes ?? []).join(", "));
         setPincode(saved.pincode ?? "");
         setStoreIds(saved.storeIds ?? []);
@@ -77,7 +77,7 @@ export default function OnboardingPage() {
       servings,
       calorieGoal,
       weeklyBudgetInr: weeklyBudget,
-      allergens: allergens as Profile["allergens"],
+      allergens,
       dislikes: dislikes
         .split(",")
         .map((s) => s.trim())
@@ -181,19 +181,37 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="mt-4 space-y-4">
             <div>
-              <Label htmlFor="allergens">Allergens (comma separated)</Label>
-              <Input
-                id="allergens"
-                value={allergens.join(", ")}
-                onChange={(e) =>
-                  setAllergens(
-                    e.target.value
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  )
-                }
-              />
+              <Label id="allergens-label">Allergens</Label>
+              <div
+                role="group"
+                aria-labelledby="allergens-label"
+                className="mt-2 flex flex-wrap gap-2"
+              >
+                {ALLERGENS.map((allergen) => {
+                  const selected = allergens.includes(allergen);
+                  return (
+                    <Button
+                      key={allergen}
+                      type="button"
+                      variant={selected ? "default" : "outline"}
+                      aria-pressed={selected}
+                      onClick={() =>
+                        setAllergens((current) =>
+                          selected
+                            ? current.filter((item) => item !== allergen)
+                            : [...current, allergen],
+                        )
+                      }
+                    >
+                      {allergen}
+                    </Button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Choose none if you have no known allergens. Filtering is best-effort — always check
+                labels.
+              </p>
             </div>
             <div>
               <Label htmlFor="dislikes">Dislikes (comma separated)</Label>

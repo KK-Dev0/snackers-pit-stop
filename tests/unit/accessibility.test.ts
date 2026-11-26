@@ -33,7 +33,8 @@ describe("accessibility fixes", () => {
       'htmlFor="servings"',
       'htmlFor="calorie-goal"',
       'htmlFor="weekly-budget"',
-      'htmlFor="allergens"',
+      'id="allergens-label"',
+      'aria-labelledby="allergens-label"',
       'htmlFor="dislikes"',
     ]) {
       expect(onboarding).toContain(marker);
