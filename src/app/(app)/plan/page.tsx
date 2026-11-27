@@ -27,6 +27,7 @@ import { ErrorState } from "@/components/common/error-state";
 import { PageHeader } from "@/components/common/page-header";
 import { PlanSkeleton } from "@/components/common/states";
 import { PageReveal } from "@/components/motion/page-reveal";
+import { CardLift } from "@/components/motion/card-lift";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { motionTokens } from "@/lib/motion";
@@ -525,7 +526,7 @@ export default function PlanPage() {
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
                 {DAYS.map((day, dayIndex) => (
-                  <div key={day} className="rounded-lg border bg-card p-3">
+                  <CardLift key={day} className="rounded-lg border bg-card p-3">
                     <h2 className="font-semibold">{day}</h2>
                     <p className="text-xs text-muted-foreground">
                       {daySummaries[dayIndex]?.kcal ?? 0} kcal · ₹
@@ -541,7 +542,7 @@ export default function PlanPage() {
                           <DroppableSlot key={slot} id={`${dayIndex}:${slot}`} label={slotLabel}>
                             {meal ? (
                               <DraggableMeal id={meal.id} label={slotLabel}>
-                                <div className="rounded-md bg-muted p-2 text-sm">
+                                <CardLift className="rounded-md bg-muted p-2 text-sm">
                                   <div className="flex items-center justify-between gap-2">
                                     <span className="text-muted-foreground">{slot}</span>
                                     <span className="flex gap-2">
@@ -564,7 +565,7 @@ export default function PlanPage() {
                                     </span>
                                   </div>
                                   <p className="truncate">{recipeTitle ?? "—"}</p>
-                                </div>
+                                </CardLift>
                               </DraggableMeal>
                             ) : (
                               <div className="rounded-md border border-dashed bg-muted/50 p-2 text-sm text-muted-foreground">
@@ -575,7 +576,7 @@ export default function PlanPage() {
                         );
                       })}
                     </div>
-                  </div>
+                  </CardLift>
                 ))}
               </div>
             </DndContext>

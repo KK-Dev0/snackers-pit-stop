@@ -2,7 +2,7 @@ import { ArrowRightIcon, ShieldCheckIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CheckeredFlag } from "@/components/landing/checkered-flag";
-import { HeroPoster } from "@/components/landing/hero-poster";
+import { HeroVisual } from "@/components/landing/hero-visual";
 import { PitBoard } from "@/components/landing/pit-board";
 import { StaggerItem, StaggerList } from "@/components/motion/stagger-list";
 
@@ -11,7 +11,7 @@ const RECIPES_HREF = "/recipes";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden animated-gradient">
       {/* Soft saffron wash behind the pit board. Decorative only. */}
       <div
         aria-hidden="true"
@@ -69,7 +69,7 @@ export function Hero() {
 
         <div className="motion-landing-reveal relative">
           <figure className="overflow-hidden rounded-3xl border border-border bg-card shadow-lift">
-            <HeroPoster className="h-52 border-b border-border/60 sm:h-64" />
+            <HeroVisual className="h-52 border-b border-border/60 sm:h-64" />
             <PitBoard />
             <figcaption className="sr-only">
               Illustration of a weekly plan using ₹1,850 of a ₹2,500 budget.

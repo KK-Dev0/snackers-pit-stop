@@ -6,10 +6,12 @@ const source = (relativePath: string) =>
   fs.readFileSync(path.join(process.cwd(), relativePath), "utf-8");
 
 describe("performance guards", () => {
-  it("keeps WebGL off mobile and data-saver connections", () => {
+  it("gates WebGL on capability, not a flat desktop cutoff", () => {
     const visual = source("src/components/landing/hero-visual.tsx");
-    expect(visual).toContain("(min-width: 1024px) and (pointer: fine)");
+    expect(visual).not.toContain("(min-width: 1024px) and (pointer: fine)");
     expect(visual).toContain("connection?.saveData !== true");
+    expect(visual).toContain("cores >= 4");
+    expect(visual).toContain("memory > 2");
 
     const scene = source("src/components/landing/hero-scene.tsx");
     expect(scene).not.toContain('import * as THREE from "three"');

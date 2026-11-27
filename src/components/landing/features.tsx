@@ -50,7 +50,7 @@ const FEATURES = [
 
 export function Features() {
   return (
-    <section className="scroll-mt-8">
+    <section className="scroll-mt-8 animated-gradient">
       <div className="mx-auto w-full max-w-5xl px-5 py-14 sm:px-6 lg:py-20">
         <SectionHeading
           eyebrow="What you get"

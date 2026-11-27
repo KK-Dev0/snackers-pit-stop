@@ -7,7 +7,7 @@ const RECIPES_HREF = "/recipes";
 
 export function FinalCta() {
   return (
-    <section className="scroll-mt-8">
+    <section className="scroll-mt-8 animated-gradient">
       <div className="mx-auto w-full max-w-5xl px-5 pb-16 sm:px-6 lg:pb-24">
         <div className="relative overflow-hidden rounded-3xl border border-border bg-card px-6 py-12 text-center shadow-soft sm:px-10 sm:py-16">
           <div

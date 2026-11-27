@@ -20,15 +20,14 @@ function canRenderScene() {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   if (sceneCapability !== undefined) return sceneCapability;
 
-  // WebGL is a desktop enhancement. Check the cheap gates before creating a
-  // canvas so phones never pay for a context probe on the critical path.
-  const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)").matches;
+  // Capability gate: cores, memory, WebGL and data-saver. Mobile devices that
+  // pass these checks are allowed the 3D scene; no flat desktop-only cutoff.
   const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
   const cores = navigator.hardwareConcurrency ?? 8;
   const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
   const saveData = connection?.saveData === true;
 
-  if (!desktop || saveData || cores < 4 || memory <= 2) {
+  if (saveData || cores < 4 || memory <= 2) {
     sceneCapability = false;
     return sceneCapability;
   }
@@ -97,7 +96,7 @@ export function HeroVisual({ className }: { className?: string }) {
     <div
       ref={containerRef}
       aria-hidden="true"
-      className={`relative overflow-hidden bg-gradient-to-b from-muted/70 to-card ${className ?? ""}`}
+      className={`relative overflow-hidden bg-gradient-to-br from-accent/15 via-primary/10 to-card ${className ?? ""}`}
       style={{ touchAction: "pan-y" }}
     >
       {useScene && hasEntered ? (
